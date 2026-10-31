@@ -67,7 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         mainWindow.title = "Took Mac"
         mainWindow.titlebarAppearsTransparent = true
         mainWindow.isOpaque = false
-        mainWindow.backgroundColor = .clear
+        mainWindow.backgroundColor = .windowBackgroundColor
         mainWindow.isReleasedWhenClosed = false
         mainWindow.level = .floating
         mainWindow.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]

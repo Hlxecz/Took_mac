@@ -16,6 +16,7 @@ struct WidgetView: View {
     @State private var confirmEmptyTrash = false
     @FocusState private var inputFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     private enum TaskTab: String, CaseIterable { case plans = "계획", upcoming = "예정", history = "기록" }
 
     var body: some View {
@@ -24,7 +25,8 @@ struct WidgetView: View {
         }
         .background {
             ZStack {
-                GlassBackground().allowsHitTesting(false)
+                // 배경 화면과 창 포커스에 상관없이 같은 색을 사용한다.
+                colorScheme == .dark ? Color(white: 0.118) : Color(white: 0.97)
                 LinearGradient(colors: [tookBlue.opacity(0.09), .clear], startPoint: .top, endPoint: .center)
             }
         }
@@ -296,16 +298,4 @@ struct EditTaskView: View {
             }
         }.padding(24).frame(width: 320)
     }
-}
-
-struct GlassBackground: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.blendingMode = .behindWindow
-        view.material = .hudWindow
-        // 창을 클릭하거나 포커스가 바뀌어도 배경 효과를 유지한다.
-        view.state = .active
-        return view
-    }
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
