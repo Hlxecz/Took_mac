@@ -55,7 +55,7 @@ public struct DoubleKnockDetector: Sendable {
             return false
         }
         if impulse < minimum * 0.4 { armed = true }
-        guard armed, impulse >= minimum, time - lastOnset >= 0.1, time - lastTrigger >= 1.2 else { return false }
+        guard armed, impulse >= minimum, time - lastOnset >= 0.1, time - lastTrigger >= 0.65 else { return false }
         armed = false
         lastOnset = time
         if let firstKnock, time - firstKnock >= 0.1, time - firstKnock <= 0.5 {

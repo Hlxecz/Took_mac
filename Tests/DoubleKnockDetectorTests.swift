@@ -20,6 +20,17 @@ final class DoubleKnockDetectorTests: XCTestCase {
         XCTAssertFalse(detector.process(tap, at: 1.01))
     }
 
+    func testASecondDeliberatePairCanHideTheWindow() {
+        var detector = warmed()
+        XCTAssertFalse(detector.process(tap, at: 0.61))
+        XCTAssertFalse(detector.process(rest, at: 0.65))
+        XCTAssertTrue(detector.process(tap, at: 0.81))
+        for frame in 850...1500 { XCTAssertFalse(detector.process(rest, at: Double(frame) / 1000)) }
+        XCTAssertFalse(detector.process(tap, at: 1.51))
+        XCTAssertFalse(detector.process(rest, at: 1.55))
+        XCTAssertTrue(detector.process(tap, at: 1.71))
+    }
+
     func testSingleHitAndRingingDoNotTrigger() {
         var detector = warmed()
         for frame in 601...900 {
