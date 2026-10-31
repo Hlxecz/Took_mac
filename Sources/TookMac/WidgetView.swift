@@ -24,7 +24,7 @@ struct WidgetView: View {
         }
         .background {
             ZStack {
-                GlassBackground()
+                GlassBackground().allowsHitTesting(false)
                 LinearGradient(colors: [tookBlue.opacity(0.09), .clear], startPoint: .top, endPoint: .center)
             }
         }
@@ -64,7 +64,10 @@ struct WidgetView: View {
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 4)
-                Button(action: showSettings) { Image(systemName: "ellipsis").frame(width: 24, height: 24) }
+                Button(action: showSettings) {
+                    Image(systemName: "ellipsis").font(.system(size: 14, weight: .semibold))
+                        .frame(width: 36, height: 36).contentShape(Rectangle())
+                }
                     .buttonStyle(.plain).foregroundStyle(.secondary).help("설정").accessibilityLabel("설정")
             }.padding(.horizontal, 24).padding(.top, 4).padding(.bottom, 18)
 

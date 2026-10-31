@@ -3,6 +3,11 @@ import SwiftUI
 import ServiceManagement
 
 @MainActor
+final class FirstClickHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = TaskStore()
     let preferences = WidgetPreferences()
@@ -67,7 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         mainWindow.level = .floating
         mainWindow.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         mainWindow.minSize = NSSize(width: 400, height: 520)
-        mainWindow.contentView = NSHostingView(rootView: WidgetView(store: store, preferences: preferences,
+        mainWindow.contentView = FirstClickHostingView(rootView: WidgetView(store: store, preferences: preferences,
             showSettings: { [weak self] in self?.openSettings() }))
         mainWindow.setFrameAutosaveName("TookMainWindow")
         if !mainWindow.setFrameUsingName("TookMainWindow") { mainWindow.center() }
@@ -105,9 +110,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func showMainWindow() {
         store.refresh()
-        settingsWindow?.orderOut(nil)
         mainWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.orderOut(nil)
     }
 
     @objc private func togglePlanWindow() {
@@ -129,13 +134,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "Took Mac 설정"
             window.isReleasedWhenClosed = false
             window.level = .floating
-            window.contentView = NSHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion))
+            window.contentView = FirstClickHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion))
             window.center()
             settingsWindow = window
         }
-        mainWindow.orderOut(nil)
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        mainWindow.orderOut(nil)
     }
 
     func applicationDidResignActive(_ notification: Notification) {
