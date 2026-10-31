@@ -1,0 +1,21 @@
+name: 맥 앱과 위젯 검증
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - name: 할 일 저장과 반복 동작 테스트
+        run: swift test
+      - name: 맥 앱과 정식 위젯 패키징
+        run: Scripts/build-app.sh
+      - name: 실행 파일 보관
+        uses: actions/upload-artifact@v7
+        with:
+          name: Took-Mac
+          path: dist/Took-Mac.zip
