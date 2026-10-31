@@ -49,12 +49,12 @@ final class TaskStore: ObservableObject {
     }
 
     @discardableResult
-    func change(_ message: String, _ update: (inout TaskDocument) throws -> Void) -> Bool {
+    func change(_ message: String, allowsUndo: Bool = true, _ update: (inout TaskDocument) throws -> Void) -> Bool {
         guard let repository, !loadFailed else { return false }
         do {
             let result = try repository.transaction(update)
             guard result.before != result.after else { return true }
-            undoDocument = result.before
+            undoDocument = allowsUndo ? result.before : nil
             document = result.after
             notice = message
             WidgetCenter.shared.reloadTimelines(ofKind: SharedTaskStorage.widgetKind)
@@ -87,19 +87,19 @@ final class TaskStore: ObservableObject {
 
 @MainActor
 final class WidgetPreferences: ObservableObject {
-    @Published var alwaysOnTop: Bool {
-        didSet { UserDefaults.standard.set(alwaysOnTop, forKey: "alwaysOnTop"); windowChanged?() }
-    }
     @Published var appearance: String {
         didSet { UserDefaults.standard.set(appearance, forKey: "appearance"); windowChanged?() }
     }
-    @Published var showQuickEntryWindow: Bool {
-        didSet { UserDefaults.standard.set(showQuickEntryWindow, forKey: "showQuickEntryWindow"); windowChanged?() }
+    @Published var knockEnabled: Bool {
+        didSet { UserDefaults.standard.set(knockEnabled, forKey: "knockEnabled"); windowChanged?() }
+    }
+    @Published var knockThreshold: Double {
+        didSet { UserDefaults.standard.set(knockThreshold, forKey: "knockThreshold"); windowChanged?() }
     }
     var windowChanged: (() -> Void)?
     init() {
-        showQuickEntryWindow = UserDefaults.standard.object(forKey: "showQuickEntryWindow") as? Bool ?? false
-        alwaysOnTop = UserDefaults.standard.bool(forKey: "alwaysOnTop")
+        knockEnabled = UserDefaults.standard.bool(forKey: "knockEnabled")
+        knockThreshold = UserDefaults.standard.object(forKey: "knockThreshold") as? Double ?? 0.045
         appearance = UserDefaults.standard.string(forKey: "appearance") ?? "system"
     }
 }

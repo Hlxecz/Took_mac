@@ -22,7 +22,7 @@ ditto '.build/xcode/Build/Products/Release/TookMac.app' "$app_dir"
 if [ -z "${TOOK_DEVELOPMENT_TEAM:-}" ]; then
     cp Configuration/local.entitlements .build/local.entitlements
     codesign --force --sign - --entitlements .build/local.entitlements "$app_dir/Contents/PlugIns/TookWidgets.appex"
-    codesign --force --sign - --entitlements .build/local.entitlements "$app_dir"
+    codesign --force --sign - --entitlements Configuration/local-app.entitlements "$app_dir"
 fi
 codesign --verify --deep --strict "$app_dir"
 ditto -c -k --keepParent "$app_dir" "$PWD/dist/Took-Mac.zip"

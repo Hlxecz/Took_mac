@@ -31,8 +31,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: local.tookmac.desktop
         EXECUTABLE_NAME: TookMac
         INFOPLIST_FILE: Resources/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Configuration/$(TOOK_STORAGE_MODE).entitlements
-        ENABLE_APP_SANDBOX: YES
+        CODE_SIGN_ENTITLEMENTS: Configuration/$(TOOK_STORAGE_MODE)-app.entitlements
+        ENABLE_APP_SANDBOX: NO
         ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: NO
   TookWidgets:
