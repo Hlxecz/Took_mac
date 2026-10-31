@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import ServiceManagement
+import TookCore
 
 @MainActor
 final class DesktopPanel: NSPanel {
@@ -18,6 +19,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var statusItem: NSStatusItem!
     private var visibilityItem: NSMenuItem!
     private var pinItem: NSMenuItem!
+    private var cornerTimer: Timer?
+    private var cornerTrigger = ScreenCornerTrigger()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -146,6 +149,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             if !panel.isVisible { panel.orderFrontRegardless() }
         } else { panel.orderOut(nil) }
         settingsWindow?.appearance = appearance
+        updateCornerWatcher()
+    }
+
+    private func updateCornerWatcher() {
+        guard preferences.openFromCorners else {
+            cornerTimer?.invalidate()
+            cornerTimer = nil
+            cornerTrigger = ScreenCornerTrigger()
+            return
+        }
+        guard cornerTimer == nil else { return }
+        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                if self.cornerTrigger.update(pointer: NSEvent.mouseLocation,
+                                             screens: NSScreen.screens.map(\.frame),
+                                             now: ProcessInfo.processInfo.systemUptime) {
+                    self.showWidget()
+                }
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        cornerTimer = timer
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        cornerTimer?.invalidate()
     }
 
     @objc func showWidget() {
@@ -163,7 +193,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
 
     @objc func openSettings() {
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 380, height: 380),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 380, height: 450),
                                   styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "Took Mac 설정"
             window.isReleasedWhenClosed = false
@@ -205,6 +235,9 @@ struct SettingsView: View {
             Toggle("바탕화면 위젯 표시", isOn: $preferences.showDesktopWidget)
             Toggle("다른 창 위에 항상 표시", isOn: $preferences.alwaysOnTop)
             Text("끄면 다른 앱을 사용할 때 바탕화면 뒤에 머물러요.").font(.caption).foregroundStyle(.secondary)
+            Toggle("화면 아래 모서리에서 위젯 열기", isOn: $preferences.openFromCorners)
+            Text("왼쪽 아래나 오른쪽 아래에 마우스를 잠깐 두면 위젯이 나타나요.")
+                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Picker("화면 모양", selection: $preferences.appearance) {
                 Text("시스템 설정").tag("system")
                 Text("밝게").tag("light")

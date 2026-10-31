@@ -75,8 +75,12 @@ final class WidgetPreferences: ObservableObject {
     @Published var showDesktopWidget: Bool {
         didSet { UserDefaults.standard.set(showDesktopWidget, forKey: "showDesktopWidget"); windowChanged?() }
     }
+    @Published var openFromCorners: Bool {
+        didSet { UserDefaults.standard.set(openFromCorners, forKey: "openFromCorners"); windowChanged?() }
+    }
     var windowChanged: (() -> Void)?
     init() {
+        openFromCorners = UserDefaults.standard.object(forKey: "openFromCorners") as? Bool ?? true
         showDesktopWidget = UserDefaults.standard.object(forKey: "showDesktopWidget") as? Bool ?? true
         alwaysOnTop = UserDefaults.standard.bool(forKey: "alwaysOnTop")
         appearance = UserDefaults.standard.string(forKey: "appearance") ?? "system"
