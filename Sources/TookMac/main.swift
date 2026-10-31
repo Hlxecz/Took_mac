@@ -1,2 +1,6 @@
-import Foundation
-print("Took Mac 화면 준비 중")
+import AppKit
+
+let application = NSApplication.shared
+let delegate = AppDelegate()
+application.delegate = delegate
+application.run()
