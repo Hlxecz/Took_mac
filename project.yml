@@ -1,0 +1,60 @@
+name: TookMac
+options:
+  bundleIdPrefix: local.tookmac
+  deploymentTarget:
+    macOS: '14.0'
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    CODE_SIGN_STYLE: Automatic
+    TOOK_STORAGE_MODE: local
+    TOOK_APP_GROUP: group.local.tookmac.shared
+packages:
+  TookCore:
+    path: .
+targets:
+  TookMac:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/TookMac
+      - Shared
+    resources:
+      - Resources/AppIcon.icns
+    dependencies:
+      - package: TookCore
+        product: TookCore
+      - target: TookWidgets
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.tookmac.desktop
+        EXECUTABLE_NAME: TookMac
+        INFOPLIST_FILE: Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Configuration/$(TOOK_STORAGE_MODE).entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+  TookWidgets:
+    type: app-extension
+    platform: macOS
+    sources:
+      - Sources/TookWidgets
+      - Shared
+    dependencies:
+      - package: TookCore
+        product: TookCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.tookmac.desktop.widgets
+        INFOPLIST_FILE: Configuration/WidgetInfo.plist
+        CODE_SIGN_ENTITLEMENTS: Configuration/$(TOOK_STORAGE_MODE).entitlements
+        ENABLE_APP_SANDBOX: YES
+        GENERATE_INFOPLIST_FILE: NO
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+schemes:
+  TookMac:
+    build:
+      targets:
+        TookMac: all

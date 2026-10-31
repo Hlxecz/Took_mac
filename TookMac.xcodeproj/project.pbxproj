@@ -1,0 +1,507 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		35181AA2C075E21B0D8F2F08 /* CompleteTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */; };
+		4FC23AE7C49794C8E03C2E40 /* TookWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3E3E92812B8382C45549B440 /* TookWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		716E947A3C4BD900C03B783F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 309CFD29211FDCE94063CEAE /* main.swift */; };
+		803AE1E17973AD619A3B7C02 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AFE79E04F4DDA878541560D /* AppDelegate.swift */; };
+		968898F3B27F29F263D1F9D5 /* TookWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9B1CB4CEA077C021E1C48 /* TookWidgets.swift */; };
+		BDBF58EDE6AAB1BC30F52311 /* CompleteTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */; };
+		CB2B4A99935F1E58C3295FC2 /* TaskStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4723210C5E4D20E8FCA7C275 /* TaskStore.swift */; };
+		EF3F990DAD131ACB3D270959 /* TookCore in Frameworks */ = {isa = PBXBuildFile; productRef = EA3298DB4D472EDD7CDD6561 /* TookCore */; };
+		F17147A3BDFD6D8012F8CD60 /* WidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3276657E13095DBD36F06B7 /* WidgetView.swift */; };
+		F8F4A43615713BCF08AA6776 /* TookCore in Frameworks */ = {isa = PBXBuildFile; productRef = 40AD725242C6BA1F5D661C17 /* TookCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		909C3006BF8EB00311A00428 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8299B2AD771D4438F7EC466B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4EE348F1FF77A52F6A331C40;
+			remoteInfo = TookWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A771F70AB56504431C782398 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4FC23AE7C49794C8E03C2E40 /* TookWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		309CFD29211FDCE94063CEAE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		3E3E92812B8382C45549B440 /* TookWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TookWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4723210C5E4D20E8FCA7C275 /* TaskStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskStore.swift; sourceTree = "<group>"; };
+		8467DA7B6877B21152D60E6A /* Took_mac */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Took_mac; path = .; sourceTree = SOURCE_ROOT; };
+		9AFE79E04F4DDA878541560D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B4D9B1CB4CEA077C021E1C48 /* TookWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TookWidgets.swift; sourceTree = "<group>"; };
+		D68251C77F5B3420DC78C385 /* TookMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TookMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteTaskIntent.swift; sourceTree = "<group>"; };
+		E3276657E13095DBD36F06B7 /* WidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		677ED5A6437F1F2A89C50648 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8F4A43615713BCF08AA6776 /* TookCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3D9934A0BC10E92AD5BE7C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF3F990DAD131ACB3D270959 /* TookCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1C64169CA93C5EC4CA34A7F7 /* TookMac */ = {
+			isa = PBXGroup;
+			children = (
+				9AFE79E04F4DDA878541560D /* AppDelegate.swift */,
+				309CFD29211FDCE94063CEAE /* main.swift */,
+				4723210C5E4D20E8FCA7C275 /* TaskStore.swift */,
+				E3276657E13095DBD36F06B7 /* WidgetView.swift */,
+			);
+			name = TookMac;
+			path = Sources/TookMac;
+			sourceTree = "<group>";
+		};
+		3CE8FFD5077D0FDD3BE81EA3 = {
+			isa = PBXGroup;
+			children = (
+				5D83C70AB1E7FC6A2CAEBBF9 /* Packages */,
+				E513497B43A3E0A1F86F22B6 /* Shared */,
+				1C64169CA93C5EC4CA34A7F7 /* TookMac */,
+				D34ED5FD5930E174DC6C0D07 /* TookWidgets */,
+				6148C08DA6C1B530A54EE0D4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5D83C70AB1E7FC6A2CAEBBF9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				8467DA7B6877B21152D60E6A /* Took_mac */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		6148C08DA6C1B530A54EE0D4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D68251C77F5B3420DC78C385 /* TookMac.app */,
+				3E3E92812B8382C45549B440 /* TookWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D34ED5FD5930E174DC6C0D07 /* TookWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				B4D9B1CB4CEA077C021E1C48 /* TookWidgets.swift */,
+			);
+			name = TookWidgets;
+			path = Sources/TookWidgets;
+			sourceTree = "<group>";
+		};
+		E513497B43A3E0A1F86F22B6 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4EE348F1FF77A52F6A331C40 /* TookWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0ADC6EA12A1A744D847170A9 /* Build configuration list for PBXNativeTarget "TookWidgets" */;
+			buildPhases = (
+				7D3ED299A7AD5E55626AF9ED /* Sources */,
+				B3D9934A0BC10E92AD5BE7C0 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TookWidgets;
+			packageProductDependencies = (
+				EA3298DB4D472EDD7CDD6561 /* TookCore */,
+			);
+			productName = TookWidgets;
+			productReference = 3E3E92812B8382C45549B440 /* TookWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		8BBF1402B4425E7378B6B269 /* TookMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A0D374BB3194164CE97AC07 /* Build configuration list for PBXNativeTarget "TookMac" */;
+			buildPhases = (
+				270D817D17256CFBA0F437E5 /* Sources */,
+				677ED5A6437F1F2A89C50648 /* Frameworks */,
+				A771F70AB56504431C782398 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0F489EBA295851F09DA93395 /* PBXTargetDependency */,
+			);
+			name = TookMac;
+			packageProductDependencies = (
+				40AD725242C6BA1F5D661C17 /* TookCore */,
+			);
+			productName = TookMac;
+			productReference = D68251C77F5B3420DC78C385 /* TookMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8299B2AD771D4438F7EC466B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					4EE348F1FF77A52F6A331C40 = {
+						ProvisioningStyle = Automatic;
+					};
+					8BBF1402B4425E7378B6B269 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 318D50396537A77BD22F6D21 /* Build configuration list for PBXProject "TookMac" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 3CE8FFD5077D0FDD3BE81EA3;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				95A7C3782C4BC13E3ACF350F /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6148C08DA6C1B530A54EE0D4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8BBF1402B4425E7378B6B269 /* TookMac */,
+				4EE348F1FF77A52F6A331C40 /* TookWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		270D817D17256CFBA0F437E5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				803AE1E17973AD619A3B7C02 /* AppDelegate.swift in Sources */,
+				BDBF58EDE6AAB1BC30F52311 /* CompleteTaskIntent.swift in Sources */,
+				CB2B4A99935F1E58C3295FC2 /* TaskStore.swift in Sources */,
+				F17147A3BDFD6D8012F8CD60 /* WidgetView.swift in Sources */,
+				716E947A3C4BD900C03B783F /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D3ED299A7AD5E55626AF9ED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				35181AA2C075E21B0D8F2F08 /* CompleteTaskIntent.swift in Sources */,
+				968898F3B27F29F263D1F9D5 /* TookWidgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0F489EBA295851F09DA93395 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4EE348F1FF77A52F6A331C40 /* TookWidgets */;
+			targetProxy = 909C3006BF8EB00311A00428 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		29366BFC1B501DA40754A4BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Configuration/$(TOOK_STORAGE_MODE).entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Configuration/WidgetInfo.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.tookmac.desktop.widgets;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		41C6A3FA04BDF161FFBA79A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Configuration/$(TOOK_STORAGE_MODE).entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = TookMac;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.tookmac.desktop;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		53BAC02DFEA15694A41ED202 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Configuration/$(TOOK_STORAGE_MODE).entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Configuration/WidgetInfo.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.tookmac.desktop.widgets;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		8CF8513D4B3681AA4529A656 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Configuration/$(TOOK_STORAGE_MODE).entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				EXECUTABLE_NAME = TookMac;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.tookmac.desktop;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		8FBA480936D179ECDF95B123 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TOOK_APP_GROUP = group.local.tookmac.shared;
+				TOOK_STORAGE_MODE = local;
+			};
+			name = Debug;
+		};
+		DE644302C5D6439221B40878 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TOOK_APP_GROUP = group.local.tookmac.shared;
+				TOOK_STORAGE_MODE = local;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0ADC6EA12A1A744D847170A9 /* Build configuration list for PBXNativeTarget "TookWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				53BAC02DFEA15694A41ED202 /* Debug */,
+				29366BFC1B501DA40754A4BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		318D50396537A77BD22F6D21 /* Build configuration list for PBXProject "TookMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8FBA480936D179ECDF95B123 /* Debug */,
+				DE644302C5D6439221B40878 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8A0D374BB3194164CE97AC07 /* Build configuration list for PBXNativeTarget "TookMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41C6A3FA04BDF161FFBA79A7 /* Debug */,
+				8CF8513D4B3681AA4529A656 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		95A7C3782C4BC13E3ACF350F /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		40AD725242C6BA1F5D661C17 /* TookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TookCore;
+		};
+		EA3298DB4D472EDD7CDD6561 /* TookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TookCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8299B2AD771D4438F7EC466B /* Project object */;
+}

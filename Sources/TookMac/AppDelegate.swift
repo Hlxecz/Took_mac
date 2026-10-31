@@ -48,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         editRoot.submenu = edit; bar.addItem(editRoot)
         let window = NSMenu(title: "윈도우")
         window.addItem(item("할 일 앱 열기", action: #selector(showMainWindow), key: "0"))
-        window.addItem(item("바탕화면 위젯 보기", action: #selector(showWidget), key: "1"))
+        window.addItem(item("빠른 입력 창 보기", action: #selector(showWidget), key: "1"))
         let windowRoot = NSMenuItem(title: "윈도우", action: nil, keyEquivalent: "")
         windowRoot.submenu = window; bar.addItem(windowRoot)
         NSApp.mainMenu = bar
@@ -109,8 +109,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let menu = NSMenu()
         menu.delegate = self
         menu.addItem(item("앱 열기", action: #selector(showMainWindow), key: "o"))
-        menu.addItem(item("위젯 앞으로 가져오기", action: #selector(showWidget), key: "n"))
-        visibilityItem = item("위젯 숨기기", action: #selector(toggleVisibility))
+        menu.addItem(item("빠른 입력 창 열기", action: #selector(showWidget), key: "n"))
+        visibilityItem = item("빠른 입력 창 숨기기", action: #selector(toggleVisibility))
         menu.addItem(visibilityItem)
         menu.addItem(.separator())
         pinItem = item("항상 위에 표시", action: #selector(togglePin))
@@ -129,7 +129,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
 
     func menuWillOpen(_ menu: NSMenu) {
         pinItem.state = preferences.alwaysOnTop ? .on : .off
-        visibilityItem.title = panel.isVisible ? "위젯 숨기기" : "위젯 표시"
+        visibilityItem.title = panel.isVisible ? "빠른 입력 창 숨기기" : "빠른 입력 창 표시"
     }
 
     private func applyPreferences() {
@@ -184,6 +184,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         UserDefaults.standard.set(NSStringFromRect(panel.frame), forKey: "widgetFrame")
     }
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if urls.contains(where: { $0.scheme == "tookmac" }) { showMainWindow(); store.refresh() }
+    }
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showMainWindow(); return true }
 }
 
@@ -202,7 +206,9 @@ struct SettingsView: View {
                 }
             }
             Divider()
-            Toggle("바탕화면 위젯 표시", isOn: $preferences.showDesktopWidget)
+            Text("바탕화면에서 우클릭 → 위젯 편집 → Took Mac을 선택하면 위젯을 추가할 수 있어요.")
+                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Toggle("빠른 입력용 플로팅 창 표시", isOn: $preferences.showDesktopWidget)
             Toggle("다른 창 위에 항상 표시", isOn: $preferences.alwaysOnTop)
             Text("끄면 다른 앱을 사용할 때 바탕화면 뒤에 머물러요.").font(.caption).foregroundStyle(.secondary)
             Picker("화면 모양", selection: $preferences.appearance) {
@@ -223,7 +229,7 @@ struct SettingsView: View {
             Divider()
             Text("할 일은 이 맥에만 저장돼요. 원본 Took 및 iCloud와는 연결되지 않아요.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            Button("저장 폴더 열기") { NSWorkspace.shared.open(store.repository.fileURL.deletingLastPathComponent()) }
+            Button("저장 폴더 열기") { store.openDataFolder() }
             Text("개인용 독립 프로젝트 · 버전 0.1.0").font(.system(size: 10)).foregroundStyle(.tertiary)
         }.padding(24).frame(width: 340)
             .alert("설정을 변경하지 못했어요", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {

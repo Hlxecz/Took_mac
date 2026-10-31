@@ -77,6 +77,30 @@ final class TaskDocumentTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: repo.fileURL), corrupt)
     }
 
+    func testTransactionsReloadTheLatestDocumentAcrossWriters() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let first = TaskRepository(fileURL: directory.appendingPathComponent("tasks.json"))
+        let second = TaskRepository(fileURL: first.fileURL)
+        _ = try first.transaction { try $0.add(title: "앱에서 추가") }
+        _ = try second.transaction { try $0.add(title: "위젯에서 추가") }
+        let result = try first.transaction { try $0.add(title: "앱에서 다시 추가") }
+        XCTAssertEqual(result.before.tasks.count, 2)
+        XCTAssertEqual(try second.load().tasks.map(\.title), ["앱에서 추가", "위젯에서 추가", "앱에서 다시 추가"])
+    }
+
+    func testFailedTransactionDoesNotChangeSavedTasks() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let repo = TaskRepository(fileURL: directory.appendingPathComponent("tasks.json"))
+        _ = try repo.transaction { try $0.add(title: "보존할 할 일") }
+        XCTAssertThrowsError(try repo.transaction {
+            try $0.add(title: "저장되면 안 되는 할 일")
+            throw TaskError.externalChange
+        })
+        XCTAssertEqual(try repo.load().tasks.map(\.title), ["보존할 할 일"])
+    }
+
     func testUnknownSchemaIsRejected() throws {
         let data = Data(#"{"version":99,"tasks":[],"history":[]}"#.utf8)
         let doc = try JSONDecoder().decode(TaskDocument.self, from: data)

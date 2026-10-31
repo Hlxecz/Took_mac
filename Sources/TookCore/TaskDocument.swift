@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 public enum RepeatRule: String, Codable, CaseIterable, Sendable {
     case none, daily, weekdays, weekly
@@ -51,11 +52,13 @@ public struct ActivityRecord: Codable, Identifiable, Equatable, Sendable {
 }
 
 public enum TaskError: LocalizedError {
-    case emptyTitle, longTitle, invalidDocument
+    case emptyTitle, longTitle, invalidDocument, sharedContainerUnavailable, externalChange
     public var errorDescription: String? {
         switch self {
         case .emptyTitle: "할 일을 입력해 주세요."
         case .longTitle: "할 일은 300자 이내로 입력해 주세요."
+        case .externalChange: "다른 창이나 위젯에서 목록이 바뀌었습니다. 최신 목록을 확인해 주세요."
+        case .sharedContainerUnavailable: "위젯 공유 저장소에 접근할 수 없습니다. 앱과 위젯의 App Groups 및 서명을 확인해 주세요."
         case .invalidDocument: "저장된 파일 형식을 확인할 수 없습니다. 원본 파일은 변경하지 않았습니다."
         }
     }
@@ -151,6 +154,21 @@ public struct TaskRepository: Sendable {
         return document
     }
 
+    public func transaction(_ update: (inout TaskDocument) throws -> Void) throws -> (before: TaskDocument, after: TaskDocument) {
+        let directory = fileURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        let descriptor = Darwin.open(directory.appendingPathComponent("tasks.lock").path, O_CREAT | O_RDWR, 0o600)
+        guard descriptor >= 0 else { throw POSIXError(.EIO) }
+        defer { Darwin.close(descriptor) }
+        guard flock(descriptor, LOCK_EX) == 0 else { throw POSIXError(.EIO) }
+        defer { flock(descriptor, LOCK_UN) }
+        let previous = try load()
+        var next = previous
+        try update(&next)
+        if previous != next { try save(next) }
+        return (previous, next)
+    }
+
     public func save(_ document: TaskDocument) throws {
         try document.validate()
         let encoder = JSONEncoder()
@@ -160,5 +178,41 @@ public struct TaskRepository: Sendable {
                                                 withIntermediateDirectories: true,
                                                 attributes: [.posixPermissions: 0o700])
         try data.write(to: fileURL, options: .atomic)
+    }
+}
+
+public enum SharedTaskStorage {
+    public static let widgetKind = "TookDesktopWidget"
+
+    public static func repository(bundle: Bundle = .main) throws -> TaskRepository {
+        let directory: URL
+        if let testPath = ProcessInfo.processInfo.environment["TOOK_DATA_DIRECTORY"] {
+            directory = URL(fileURLWithPath: testPath, isDirectory: true)
+        } else if bundle.object(forInfoDictionaryKey: "TookStorageMode") as? String == "local" {
+            // shortcut: 개인용 빌드는 전용 폴더만 공유한다. 배포 서명을 도입할 때 App Groups로 전환한다.
+            guard let home = getpwuid(getuid())?.pointee.pw_dir else { throw TaskError.sharedContainerUnavailable }
+            directory = URL(fileURLWithPath: String(cString: home), isDirectory: true)
+                .appendingPathComponent("Library/Application Support/TookMac", isDirectory: true)
+        } else if let group = bundle.object(forInfoDictionaryKey: "TookAppGroup") as? String, !group.isEmpty {
+            guard let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else {
+                throw TaskError.sharedContainerUnavailable
+            }
+            directory = container.appendingPathComponent("TookMac", isDirectory: true)
+            // 첫 공유 저장소 전환에서만 기존 맥 버전 데이터를 복사한다. 원본은 보존한다.
+            let old = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("TookMac/tasks.json")
+            let target = directory.appendingPathComponent("tasks.json")
+            if FileManager.default.fileExists(atPath: old.path), !FileManager.default.fileExists(atPath: target.path),
+               bundle.bundleIdentifier == "local.tookmac.desktop" {
+                let source = try TaskRepository(fileURL: old).load()
+                _ = try TaskRepository(fileURL: target).transaction { current in
+                    if current == TaskDocument() { current = source }
+                }
+            }
+        } else {
+            directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("TookMac", isDirectory: true)
+        }
+        return TaskRepository(fileURL: directory.appendingPathComponent("tasks.json"))
     }
 }

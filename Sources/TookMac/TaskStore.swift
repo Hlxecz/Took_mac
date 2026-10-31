@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import TookCore
+import WidgetKit
 
 @MainActor
 final class TaskStore: ObservableObject {
@@ -9,21 +10,20 @@ final class TaskStore: ObservableObject {
     @Published private(set) var notice: String?
     @Published var error: String?
     @Published private(set) var loadFailed = false
-    let repository: TaskRepository
+    let repository: TaskRepository?
 
     init() {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let directory: URL
-        if let testPath = ProcessInfo.processInfo.environment["TOOK_DATA_DIRECTORY"] {
-            directory = URL(fileURLWithPath: testPath, isDirectory: true)
-        } else {
-            directory = support.appendingPathComponent("TookMac", isDirectory: true)
+        do { repository = try SharedTaskStorage.repository() }
+        catch {
+            repository = nil
+            loadFailed = true
+            self.error = error.localizedDescription
         }
-        repository = TaskRepository(fileURL: directory.appendingPathComponent("tasks.json"))
-        reload()
+        if repository != nil { reload() }
     }
 
     func reload() {
+        guard let repository else { return }
         do {
             document = try repository.load()
             loadFailed = false
@@ -34,17 +34,30 @@ final class TaskStore: ObservableObject {
         }
     }
 
+    func refresh() {
+        guard let repository, !loadFailed else { return }
+        do {
+            let latest = try repository.load()
+            if latest != document {
+                document = latest
+                dismissNotice()
+            }
+        } catch {
+            loadFailed = true
+            self.error = error.localizedDescription
+        }
+    }
+
     @discardableResult
     func change(_ message: String, _ update: (inout TaskDocument) throws -> Void) -> Bool {
-        guard !loadFailed else { return false }
+        guard let repository, !loadFailed else { return false }
         do {
-            var next = document
-            try update(&next)
-            guard next != document else { return true }
-            try repository.save(next)
-            undoDocument = document
-            document = next
+            let result = try repository.transaction(update)
+            guard result.before != result.after else { return true }
+            undoDocument = result.before
+            document = result.after
             notice = message
+            WidgetCenter.shared.reloadTimelines(ofKind: SharedTaskStorage.widgetKind)
             return true
         } catch {
             self.error = "변경 사항을 저장하지 못했습니다.\n\(error.localizedDescription)"
@@ -53,15 +66,23 @@ final class TaskStore: ObservableObject {
     }
 
     func undo() {
-        guard let previous = undoDocument else { return }
+        guard let repository, let previous = undoDocument else { return }
         do {
-            try repository.save(previous)
-            document = previous
+            let expected = document
+            let result = try repository.transaction { current in
+                guard current == expected else { throw TaskError.externalChange }
+                current = previous
+            }
+            document = result.after
             dismissNotice()
-        } catch { self.error = error.localizedDescription }
+            WidgetCenter.shared.reloadTimelines(ofKind: SharedTaskStorage.widgetKind)
+        } catch { self.error = error.localizedDescription; refresh() }
     }
 
     func dismissNotice() { undoDocument = nil; notice = nil }
+    func openDataFolder() {
+        if let repository { NSWorkspace.shared.open(repository.fileURL.deletingLastPathComponent()) }
+    }
 }
 
 @MainActor
@@ -77,7 +98,7 @@ final class WidgetPreferences: ObservableObject {
     }
     var windowChanged: (() -> Void)?
     init() {
-        showDesktopWidget = UserDefaults.standard.object(forKey: "showDesktopWidget") as? Bool ?? true
+        showDesktopWidget = UserDefaults.standard.object(forKey: "showDesktopWidget") as? Bool ?? false
         alwaysOnTop = UserDefaults.standard.bool(forKey: "alwaysOnTop")
         appearance = UserDefaults.standard.string(forKey: "appearance") ?? "system"
     }

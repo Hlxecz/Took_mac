@@ -4,7 +4,8 @@ import PackageDescription
 let package = Package(
     name: "TookMac",
     platforms: [.macOS(.v14)],
-    products: [.executable(name: "TookMac", targets: ["TookMac"])],
+    products: [.library(name: "TookCore", targets: ["TookCore"]),
+               .executable(name: "TookMac", targets: ["TookMac"])],
     targets: [
         .target(name: "TookCore"),
         .executableTarget(name: "TookMac", dependencies: ["TookCore"]),
