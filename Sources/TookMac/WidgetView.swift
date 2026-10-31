@@ -73,7 +73,8 @@ struct WidgetView: View {
                 ForEach(TaskTab.allCases, id: \.self) { item in
                     Button { tab = item } label: {
                         Text(item.rawValue).font(.system(size: 12, weight: tab == item ? .semibold : .medium))
-                            .frame(maxWidth: .infinity).padding(.vertical, 7)
+                            .frame(maxWidth: .infinity).padding(.vertical, 9)
+                            .contentShape(Rectangle())
                             .background(tab == item ? tookBlue.opacity(0.10) : .clear, in: RoundedRectangle(cornerRadius: 8))
                             .foregroundStyle(tab == item ? tookBlue : .secondary)
                     }.buttonStyle(.plain).accessibilityAddTraits(tab == item ? .isSelected : [])
