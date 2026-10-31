@@ -30,8 +30,9 @@ struct WidgetView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(.primary.opacity(0.10)))
+        .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(LinearGradient(colors: [.white.opacity(0.36), .white.opacity(0.10)], startPoint: .topLeading, endPoint: .bottomTrailing)))
         .tint(tookBlue)
+        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in store.refresh() }
         .sheet(item: $editingTask) { task in
             EditTaskView(task: task, store: store)
         }
@@ -87,7 +88,7 @@ struct WidgetView: View {
                     Text("저장 파일을 확인해 주세요").font(.headline)
                     Text("기존 파일을 보호하기 위해 편집을 멈췄어요.").font(.caption).foregroundStyle(.secondary)
                     Button("다시 불러오기") { store.reload() }
-                    Button("저장 폴더 열기") { NSWorkspace.shared.open(store.repository.fileURL.deletingLastPathComponent()) }
+                    Button("저장 폴더 열기") { store.openDataFolder() }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
@@ -263,6 +264,7 @@ struct GlassBackground: NSViewRepresentable {
         let view = NSVisualEffectView()
         view.blendingMode = .behindWindow
         view.material = .hudWindow
+        // 창을 클릭하거나 포커스가 바뀌어도 배경 효과를 유지한다.
         view.state = .active
         return view
     }
