@@ -93,12 +93,12 @@ final class WidgetPreferences: ObservableObject {
     @Published var appearance: String {
         didSet { UserDefaults.standard.set(appearance, forKey: "appearance"); windowChanged?() }
     }
-    @Published var showDesktopWidget: Bool {
-        didSet { UserDefaults.standard.set(showDesktopWidget, forKey: "showDesktopWidget"); windowChanged?() }
+    @Published var showQuickEntryWindow: Bool {
+        didSet { UserDefaults.standard.set(showQuickEntryWindow, forKey: "showQuickEntryWindow"); windowChanged?() }
     }
     var windowChanged: (() -> Void)?
     init() {
-        showDesktopWidget = UserDefaults.standard.object(forKey: "showDesktopWidget") as? Bool ?? false
+        showQuickEntryWindow = UserDefaults.standard.object(forKey: "showQuickEntryWindow") as? Bool ?? false
         alwaysOnTop = UserDefaults.standard.bool(forKey: "alwaysOnTop")
         appearance = UserDefaults.standard.string(forKey: "appearance") ?? "system"
     }

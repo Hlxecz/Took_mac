@@ -142,21 +142,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         }
         panel.appearance = appearance
         mainWindow.appearance = appearance
-        if preferences.showDesktopWidget {
+        if preferences.showQuickEntryWindow {
             if !panel.isVisible { panel.orderFrontRegardless() }
         } else { panel.orderOut(nil) }
         settingsWindow?.appearance = appearance
     }
 
     @objc func showWidget() {
-        preferences.showDesktopWidget = true
+        preferences.showQuickEntryWindow = true
         panel.level = .floating
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc private func toggleVisibility() {
-        preferences.showDesktopWidget.toggle()
+        preferences.showQuickEntryWindow.toggle()
     }
     @objc private func togglePin() { preferences.alwaysOnTop.toggle() }
     @objc private func quit() { NSApp.terminate(nil) }
@@ -208,7 +208,7 @@ struct SettingsView: View {
             Divider()
             Text("바탕화면에서 우클릭 → 위젯 편집 → Took Mac을 선택하면 위젯을 추가할 수 있어요.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            Toggle("빠른 입력용 플로팅 창 표시", isOn: $preferences.showDesktopWidget)
+            Toggle("빠른 입력용 플로팅 창 표시", isOn: $preferences.showQuickEntryWindow)
             Toggle("다른 창 위에 항상 표시", isOn: $preferences.alwaysOnTop)
             Text("끄면 다른 앱을 사용할 때 바탕화면 뒤에 머물러요.").font(.caption).foregroundStyle(.secondary)
             Picker("화면 모양", selection: $preferences.appearance) {
