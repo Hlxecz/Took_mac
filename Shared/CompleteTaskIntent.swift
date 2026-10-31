@@ -3,10 +3,10 @@ import TookCore
 import WidgetKit
 
 struct CompleteTaskIntent: AppIntent {
-    static let title: LocalizedStringResource = "할 일 완료"
-    static let description = IntentDescription("완료한 할 일을 위젯에서 숨깁니다.")
+    static let title: LocalizedStringResource = "계획 완료"
+    static let description = IntentDescription("완료한 계획을 위젯에서 숨깁니다.")
     static let openAppWhenRun = false
-    @Parameter(title: "할 일 ID") var taskID: String
+    @Parameter(title: "계획 ID") var taskID: String
 
     init() {}
     init(taskID: String) { self.taskID = taskID }

@@ -101,6 +101,49 @@ final class TaskDocumentTests: XCTestCase {
         XCTAssertEqual(try repo.load().tasks.map(\.title), ["보존할 할 일"])
     }
 
+    func testPlansRemainUntilCompletedAndDragOrderPersists() throws {
+        var doc = TaskDocument()
+        let old = day("2026-10-01")
+        let first = try doc.add(title: "첫 계획", scheduledDate: old, now: old)
+        let second = try doc.add(title: "둘째 계획", scheduledDate: old, now: old)
+        let third = try doc.add(title: "셋째 계획", scheduledDate: old, now: old)
+        doc.move(id: first, to: third)
+        XCTAssertEqual(doc.pending(on: day("2026-11-30"), calendar: calendar).map(\.id), [second, third, first])
+        doc.move(id: first, to: second)
+        XCTAssertEqual(doc.tasks.map(\.id), [first, second, third])
+        let loaded = try JSONDecoder().decode(TaskDocument.self, from: JSONEncoder().encode(doc))
+        XCTAssertEqual(loaded.tasks.map(\.id), [first, second, third])
+        doc.move(id: UUID(), to: first)
+        XCTAssertEqual(doc.tasks.count, 3)
+    }
+
+    func testTomorrowPreviewUsesScheduledDayAndUpcomingIncludesLaterDays() throws {
+        var doc = TaskDocument()
+        let now = day("2026-10-31")
+        try doc.add(title: "남아 있는 계획", scheduledDate: day("2026-10-30"))
+        try doc.add(title: "내일 계획", scheduledDate: day("2026-11-01"))
+        try doc.add(title: "나중 계획", scheduledDate: day("2026-11-03"))
+        XCTAssertEqual(doc.pending(on: now, calendar: calendar).map(\.title), ["남아 있는 계획"])
+        XCTAssertEqual(doc.scheduled(on: day("2026-11-01"), calendar: calendar).map(\.title), ["내일 계획"])
+        XCTAssertEqual(doc.upcoming(after: now, calendar: calendar).map(\.title), ["내일 계획", "나중 계획"])
+    }
+
+    func testEmptyTrashKeepsCompletedHistoryAndActivePlans() throws {
+        var doc = TaskDocument()
+        let now = day("2026-10-31")
+        let done = try doc.add(title: "끝낸 계획", scheduledDate: now)
+        let deleted = try doc.add(title: "지운 계획", scheduledDate: now)
+        try doc.add(title: "남길 계획", scheduledDate: now)
+        doc.complete(id: done, now: now, calendar: calendar)
+        doc.delete(id: deleted, now: now)
+        doc.emptyTrash()
+        XCTAssertEqual(doc.history.count, 1)
+        XCTAssertEqual(doc.history.first?.kind, .completed)
+        XCTAssertEqual(doc.tasks.map(\.title), ["남길 계획"])
+        doc.restore(recordID: doc.history[0].id)
+        XCTAssertEqual(doc.tasks.count, 2)
+    }
+
     func testUnknownSchemaIsRejected() throws {
         let data = Data(#"{"version":99,"tasks":[],"history":[]}"#.utf8)
         let doc = try JSONDecoder().decode(TaskDocument.self, from: data)

@@ -5,12 +5,13 @@ import TookCore
 struct TookEntry: TimelineEntry {
     let date: Date
     let tasks: [TaskItem]
+    var tomorrowPlans: [TaskItem] = []
     var error: String? = nil
 }
 
 struct TookProvider: TimelineProvider {
     func placeholder(in context: Context) -> TookEntry {
-        TookEntry(date: .now, tasks: [TaskItem(title: "할 일을 툭, 적어 보세요")])
+        TookEntry(date: .now, tasks: [TaskItem(title: "새 계획을 적어 보세요")])
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TookEntry) -> Void) {
@@ -22,8 +23,7 @@ struct TookProvider: TimelineProvider {
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: now))!
         do {
             let doc = try SharedTaskStorage.repository().load()
-            let entries = [TookEntry(date: now, tasks: doc.pending(on: now)),
-                           TookEntry(date: tomorrow, tasks: doc.pending(on: tomorrow))]
+            let entries = [entry(for: now, document: doc), entry(for: tomorrow, document: doc)]
             completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(15 * 60))))
         } catch {
             completion(Timeline(entries: [TookEntry(date: now, tasks: [], error: "앱에서 공유 저장소를 확인해 주세요")],
@@ -31,8 +31,13 @@ struct TookProvider: TimelineProvider {
         }
     }
 
+    private func entry(for date: Date, document: TaskDocument) -> TookEntry {
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date)!
+        return TookEntry(date: date, tasks: document.pending(on: date), tomorrowPlans: document.scheduled(on: tomorrow))
+    }
+
     private func read() -> TookEntry {
-        do { return TookEntry(date: .now, tasks: try SharedTaskStorage.repository().load().pending(on: .now)) }
+        do { return entry(for: .now, document: try SharedTaskStorage.repository().load()) }
         catch { return TookEntry(date: .now, tasks: [], error: "앱에서 공유 저장소를 확인해 주세요") }
     }
 }
@@ -41,17 +46,17 @@ struct TookWidgetView: View {
     let entry: TookEntry
     @Environment(\.widgetFamily) private var family
     private let accent = Color(red: 0.97, green: 0.51, blue: 0.43)
-    private var limit: Int { family == .systemSmall ? 3 : family == .systemMedium ? 3 : 8 }
+    private var limit: Int { family == .systemSmall ? (entry.tomorrowPlans.isEmpty ? 3 : 2) : family == .systemMedium ? 3 : 8 }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: family == .systemSmall ? 10 : 14) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
-                Text(entry.date, format: .dateTime.month().day().weekday(.wide).locale(Locale(identifier: "ko_KR")))
+                Text("계획")
                     .font(.system(size: family == .systemSmall ? 13 : 16, weight: .bold))
                 Spacer(minLength: 3)
                 Link(destination: URL(string: "tookmac://add")!) {
                     Image(systemName: "plus").font(.system(size: 12, weight: .semibold)).foregroundStyle(accent)
-                }.accessibilityLabel("앱에서 할 일 추가")
+                }.accessibilityLabel("앱에서 계획 추가")
             }
             if let error = entry.error {
                 Text(error).font(.caption).foregroundStyle(.secondary)
@@ -59,7 +64,7 @@ struct TookWidgetView: View {
                 Spacer(minLength: 0)
                 HStack(spacing: 7) {
                     Image(systemName: "checkmark").foregroundStyle(accent)
-                    Text("지금 남은 할 일이 없어요").font(.system(size: 12)).foregroundStyle(.secondary)
+                    Text("남은 계획이 없어요").font(.system(size: 12)).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
             } else {
@@ -78,6 +83,10 @@ struct TookWidgetView: View {
                 Link("외 \(entry.tasks.count - limit)개 · 앱에서 보기", destination: URL(string: "tookmac://list")!)
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             }
+            if let tomorrow = entry.tomorrowPlans.first {
+                Text("내일: \(tomorrow.title)\(entry.tomorrowPlans.count > 1 ? " 외 \(entry.tomorrowPlans.count - 1)개" : "")")
+                    .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
+            }
         }
         .containerBackground(for: .widget) { Color.clear }
         .widgetURL(URL(string: "tookmac://list"))
@@ -91,7 +100,7 @@ struct TookWidgets: Widget {
             TookWidgetView(entry: entry)
         }
         .configurationDisplayName("Took Mac")
-        .description("오늘 할 일을 바로 보고, 체크해서 완료하세요.")
+        .description("계획을 바로 보고 체크하세요. 완료할 때까지 남아 있어요.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .containerBackgroundRemovable(true)
     }

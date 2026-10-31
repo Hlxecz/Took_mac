@@ -7,17 +7,16 @@ struct WidgetView: View {
     @ObservedObject var store: TaskStore
     @ObservedObject var preferences: WidgetPreferences
     let showSettings: () -> Void
-    var isDesktop = true
-    var showApp: (() -> Void)? = nil
-    @State private var tab: TaskTab = .today
+    @State private var tab: TaskTab = .plans
     @State private var title = ""
     @State private var scheduledDate = Date()
     @State private var repeatRule: RepeatRule = .none
     @State private var showOptions = false
     @State private var editingTask: TaskItem?
+    @State private var confirmEmptyTrash = false
     @FocusState private var inputFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private enum TaskTab: String, CaseIterable { case today = "오늘", upcoming = "예정", history = "기록" }
+    private enum TaskTab: String, CaseIterable { case plans = "계획", upcoming = "예정", history = "기록" }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -33,6 +32,14 @@ struct WidgetView: View {
         .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(LinearGradient(colors: [.white.opacity(0.36), .white.opacity(0.10)], startPoint: .topLeading, endPoint: .bottomTrailing)))
         .tint(tookBlue)
         .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in store.refresh() }
+        .confirmationDialog("휴지통을 비울까요?", isPresented: $confirmEmptyTrash, titleVisibility: .visible) {
+            Button("휴지통 비우기", role: .destructive) {
+                _ = store.change("휴지통을 비웠어요", allowsUndo: false) { $0.emptyTrash() }
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("휴지통에 있는 계획을 영구 삭제합니다. 완료 기록은 유지되며, 삭제한 계획은 복원할 수 없어요.")
+        }
         .sheet(item: $editingTask) { task in
             EditTaskView(task: task, store: store)
         }
@@ -44,31 +51,22 @@ struct WidgetView: View {
     private func content(now: Date) -> some View {
         let pending = store.document.pending(on: now)
         let upcoming = store.document.upcoming(after: now)
-        let completedToday = store.document.history.filter { $0.kind == .completed && Calendar.current.isDate($0.date, inSameDayAs: now) }.count
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: now))!
+        let tomorrowPlans = store.document.scheduled(on: tomorrow)
+        let trashed = store.document.history.filter { $0.kind == .deleted }.count
         return VStack(spacing: 0) {
-            if isDesktop {
-                ZStack {
-                    DragArea().frame(height: 18)
-                    Capsule().fill(.secondary.opacity(0.20)).frame(width: 26, height: 3).allowsHitTesting(false)
-                }
-            } else {
-                Spacer().frame(height: 24)
-            }
+            Spacer().frame(height: 24)
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(now, format: .dateTime.month(.wide).day().weekday(.wide).locale(Locale(identifier: "ko_KR")))
-                        .font(.system(size: isDesktop ? 22 : 30, weight: .bold)).tracking(-0.8)
-                    Text(tab == .history ? "기록" : "To do \(tab == .today ? pending.count : upcoming.count)")
+                    Text(tab.rawValue)
+                        .font(.system(size: 30, weight: .bold)).tracking(-0.8)
+                    Text(tab == .history ? "기록" : "\(tab == .plans ? pending.count : upcoming.count)개의 계획")
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 4)
-                if isDesktop, let showApp {
-                    Button(action: showApp) { Image(systemName: "arrow.up.right.square").frame(width: 24, height: 24) }
-                        .buttonStyle(.plain).foregroundStyle(.secondary).help("앱 열기").accessibilityLabel("앱 열기")
-                }
                 Button(action: showSettings) { Image(systemName: "ellipsis").frame(width: 24, height: 24) }
                     .buttonStyle(.plain).foregroundStyle(.secondary).help("설정").accessibilityLabel("설정")
-            }.padding(.horizontal, 24).padding(.top, isDesktop ? 12 : 4).padding(.bottom, 18)
+            }.padding(.horizontal, 24).padding(.top, 4).padding(.bottom, 18)
 
             HStack(spacing: 4) {
                 ForEach(TaskTab.allCases, id: \.self) { item in
@@ -94,16 +92,51 @@ struct WidgetView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         if tab == .history {
+                            if trashed > 0 {
+                                HStack {
+                                    Text("휴지통 \(trashed)개").font(.system(size: 11)).foregroundStyle(.secondary)
+                                    Spacer()
+                                    Button("휴지통 비우기", role: .destructive) { confirmEmptyTrash = true }
+                                        .font(.system(size: 11)).buttonStyle(.plain)
+                                }.padding(.vertical, 10)
+                            }
                             if store.document.history.isEmpty {
-                                emptyState(symbol: "clock.arrow.circlepath", title: "아직 기록이 없어요", detail: "완료하거나 지운 할 일을 여기서 복원해요.")
+                                emptyState(symbol: "clock.arrow.circlepath", title: "아직 기록이 없어요", detail: "완료하거나 지운 계획을 여기서 복원해요.")
                             }
                             ForEach(store.document.history) { record in historyRow(record) }
                         } else {
-                            let items = tab == .today ? pending : upcoming
+                            let items = tab == .plans ? pending : upcoming
                             if items.isEmpty {
-                                emptyState(symbol: tab == .today ? "checkmark" : "calendar", title: tab == .today ? (completedToday > 0 ? "오늘도 수고했어요" : "오늘 할 일을 적어 보세요") : "예정된 할 일이 없어요", detail: tab == .today ? (completedToday > 0 ? "오늘 \(completedToday)개의 할 일을 마쳤어요." : "끝낸 일은 체크하면 사라져요.") : "할 일을 추가할 때 날짜를 골라 보세요.")
+                                emptyState(symbol: tab == .plans ? "checkmark" : "calendar",
+                                    title: tab == .plans ? "남은 계획이 없어요" : "예정된 계획이 없어요",
+                                    detail: tab == .plans ? "새 계획을 적어 보세요. 완료할 때까지 여기에 남아요." : "계획을 추가할 때 미래 날짜를 골라 보세요.")
                             }
-                            ForEach(items) { task in taskRow(task, now: now) }
+                            ForEach(items) { task in
+                                if tab == .plans {
+                                    taskRow(task, now: now)
+                                        .draggable(task.id.uuidString)
+                                        .dropDestination(for: String.self) { ids, _ in
+                                            guard let text = ids.first, let source = UUID(uuidString: text),
+                                                  source != task.id, pending.contains(where: { $0.id == source }) else { return false }
+                                            return store.change("계획 순서를 바꿨어요") { $0.move(id: source, to: task.id) }
+                                        }
+                                        .accessibilityAction(named: "위로 이동") { move(task, in: items, direction: -1) }
+                                        .accessibilityAction(named: "아래로 이동") { move(task, in: items, direction: 1) }
+                                } else { taskRow(task, now: now) }
+                            }
+                            if tab == .plans && !tomorrowPlans.isEmpty {
+                                VStack(alignment: .leading, spacing: 7) {
+                                    Label("내일은 이런 계획이 잡혀 있습니다", systemImage: "calendar")
+                                        .font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                                    ForEach(tomorrowPlans.prefix(3)) { task in
+                                        Text(task.title).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                                    }
+                                    Button(tomorrowPlans.count > 3 ? "외 \(tomorrowPlans.count - 3)개 · 예정에서 보기" : "예정에서 보기") { tab = .upcoming }
+                                        .font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(tookBlue)
+                                }.frame(maxWidth: .infinity, alignment: .leading).padding(12)
+                                    .background(.primary.opacity(0.025), in: RoundedRectangle(cornerRadius: 12))
+                                    .padding(.top, 16)
+                            }
                         }
                     }.padding(.horizontal, 24).padding(.bottom, 12)
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -114,13 +147,15 @@ struct WidgetView: View {
                     HStack(spacing: 6) {
                         Text(notice).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
                         Spacer(minLength: 0)
-                        Button("되돌리기") { animate { store.undo() } }.font(.system(size: 11, weight: .semibold)).buttonStyle(.plain).foregroundStyle(tookBlue)
+                        if store.undoDocument != nil {
+                            Button("되돌리기") { animate { store.undo() } }.font(.system(size: 11, weight: .semibold)).buttonStyle(.plain).foregroundStyle(tookBlue)
+                        }
                         Button { store.dismissNotice() } label: { Image(systemName: "xmark").font(.system(size: 9)).frame(width: 20, height: 20) }.buttonStyle(.plain).accessibilityLabel("알림 닫기")
                     }
                 }
                 if showOptions {
                     HStack {
-                        DatePicker("날짜", selection: $scheduledDate, displayedComponents: .date).labelsHidden().datePickerStyle(.field).accessibilityLabel("할 일 날짜")
+                        DatePicker("날짜", selection: $scheduledDate, displayedComponents: .date).labelsHidden().datePickerStyle(.field).accessibilityLabel("계획 날짜")
                         Spacer()
                         Picker("반복", selection: $repeatRule) {
                             ForEach(RepeatRule.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -128,16 +163,16 @@ struct WidgetView: View {
                     }.font(.system(size: 11))
                 }
                 HStack(spacing: 7) {
-                    TextField("새로운 할 일", text: $title)
+                    TextField("새로운 계획", text: $title)
                         .textFieldStyle(.plain).font(.system(size: 13)).focused($inputFocused)
-                        .onSubmit(addTask).accessibilityLabel("새 할 일")
+                        .onSubmit(addTask).accessibilityLabel("새 계획")
                     Button { showOptions.toggle() } label: {
                         Image(systemName: showOptions || repeatRule != .none ? "calendar.badge.clock" : "calendar").frame(width: 25, height: 28)
                     }.buttonStyle(.plain).foregroundStyle(showOptions ? tookBlue : .secondary).help("날짜와 반복 설정").accessibilityLabel("날짜와 반복 설정")
                     Button(action: addTask) {
                         Image(systemName: "plus").font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
                             .frame(width: 28, height: 28).background(tookBlue, in: RoundedRectangle(cornerRadius: 8))
-                    }.buttonStyle(.plain).disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty).accessibilityLabel("할 일 추가")
+                    }.buttonStyle(.plain).disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty).accessibilityLabel("계획 추가")
                 }.padding(.horizontal, 12).padding(.vertical, 8)
                     .background(.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(inputFocused ? tookBlue.opacity(0.5) : .clear))
@@ -150,7 +185,7 @@ struct WidgetView: View {
     private func taskRow(_ task: TaskItem, now: Date) -> some View {
         HStack(alignment: .top, spacing: 11) {
             Button {
-                animate { _ = store.change("할 일을 완료했어요") { $0.complete(id: task.id) } }
+                animate { _ = store.change("계획을 완료했어요") { $0.complete(id: task.id) } }
             } label: {
                 Image(systemName: "circle").font(.system(size: 22, weight: .light)).foregroundStyle(.secondary.opacity(0.6)).frame(width: 24, height: 25)
             }.buttonStyle(.plain).accessibilityLabel("\(task.title) 완료")
@@ -166,10 +201,14 @@ struct WidgetView: View {
                     }.font(.system(size: 10)).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 3)
+            if tab == .plans {
+                Image(systemName: "line.3.horizontal").font(.system(size: 10)).foregroundStyle(.tertiary)
+                    .padding(.top, 8).help("계획을 끌어서 순서를 바꿀 수 있어요")
+            }
             Menu {
                 Button("수정", systemImage: "pencil") { editingTask = task }
                 Button("내일로 미루기", systemImage: "calendar") {
-                    _ = store.change("내일 할 일로 옮겼어요") {
+                    _ = store.change("내일 계획으로 옮겼어요") {
                         try $0.edit(id: task.id, title: task.title, scheduledDate: Calendar.current.date(byAdding: .day, value: 1, to: Date())!, repeatRule: task.repeatRule)
                     }
                 }
@@ -193,7 +232,7 @@ struct WidgetView: View {
                 Text("\(record.date.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "ko_KR")))) · \(record.kind == .completed ? "완료" : "휴지통")")
                     .font(.system(size: 10)).foregroundStyle(.tertiary)
             }.frame(maxWidth: .infinity, alignment: .leading)
-            Button("복원") { animate { _ = store.change("할 일을 복원했어요") { $0.restore(recordID: record.id) } } }
+            Button("복원") { animate { _ = store.change("계획을 복원했어요") { $0.restore(recordID: record.id) } } }
                 .font(.system(size: 11)).buttonStyle(.plain).foregroundStyle(tookBlue).padding(.top, 4)
                 .accessibilityLabel("\(record.task.title) 복원")
         }.padding(.vertical, 12)
@@ -209,11 +248,16 @@ struct WidgetView: View {
     }
 
     private func addTask() {
-        if store.change("할 일을 추가했어요", { try $0.add(title: title, scheduledDate: showOptions ? scheduledDate : Date(), repeatRule: repeatRule) }) {
-            tab = Calendar.current.startOfDay(for: showOptions ? scheduledDate : Date()) > Calendar.current.startOfDay(for: Date()) ? .upcoming : .today
+        if store.change("계획을 추가했어요", { try $0.add(title: title, scheduledDate: showOptions ? scheduledDate : Date(), repeatRule: repeatRule) }) {
+            tab = Calendar.current.startOfDay(for: showOptions ? scheduledDate : Date()) > Calendar.current.startOfDay(for: Date()) ? .upcoming : .plans
             title = ""; scheduledDate = Date(); repeatRule = .none; showOptions = false
             inputFocused = true
         }
+    }
+
+    private func move(_ task: TaskItem, in items: [TaskItem], direction: Int) {
+        guard let index = items.firstIndex(where: { $0.id == task.id }), items.indices.contains(index + direction) else { return }
+        _ = store.change("계획 순서를 바꿨어요") { $0.move(id: task.id, to: items[index + direction].id) }
     }
 
     private func animate(_ action: () -> Void) {
@@ -236,26 +280,18 @@ struct EditTaskView: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("할 일 수정").font(.title3.bold())
-            TextField("할 일", text: $title).textFieldStyle(.roundedBorder)
+            Text("계획 수정").font(.title3.bold())
+            TextField("계획", text: $title).textFieldStyle(.roundedBorder)
             DatePicker("날짜", selection: $date, displayedComponents: .date)
             Picker("반복", selection: $rule) { ForEach(RepeatRule.allCases, id: \.self) { Text($0.title).tag($0) } }
             HStack {
                 Spacer()
                 Button("취소") { dismiss() }.keyboardShortcut(.cancelAction)
                 Button("저장") {
-                    if store.change("할 일을 수정했어요", { try $0.edit(id: task.id, title: title, scheduledDate: date, repeatRule: rule) }) { dismiss() }
+                    if store.change("계획을 수정했어요", { try $0.edit(id: task.id, title: title, scheduledDate: date, repeatRule: rule) }) { dismiss() }
                 }.keyboardShortcut(.defaultAction).disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }.padding(24).frame(width: 320)
-    }
-}
-
-struct DragArea: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView { DragView() }
-    func updateNSView(_ nsView: NSView, context: Context) {}
-    private final class DragView: NSView {
-        override func mouseDown(with event: NSEvent) { window?.performDrag(with: event) }
     }
 }
 

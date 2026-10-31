@@ -80,13 +80,28 @@ public struct TaskDocument: Codable, Equatable, Sendable {
     public func pending(on date: Date, calendar: Calendar = .current) -> [TaskItem] {
         let day = calendar.startOfDay(for: date)
         return tasks.filter { calendar.startOfDay(for: $0.scheduledDate) <= day }
-            .sorted { $0.createdAt < $1.createdAt }
     }
 
     public func upcoming(after date: Date, calendar: Calendar = .current) -> [TaskItem] {
         let day = calendar.startOfDay(for: date)
         return tasks.filter { calendar.startOfDay(for: $0.scheduledDate) > day }
             .sorted { $0.scheduledDate == $1.scheduledDate ? $0.createdAt < $1.createdAt : $0.scheduledDate < $1.scheduledDate }
+    }
+
+    public func scheduled(on date: Date, calendar: Calendar = .current) -> [TaskItem] {
+        tasks.filter { calendar.isDate($0.scheduledDate, inSameDayAs: date) }
+    }
+
+    public mutating func move(id: UUID, to targetID: UUID) {
+        guard id != targetID,
+              let source = tasks.firstIndex(where: { $0.id == id }),
+              let target = tasks.firstIndex(where: { $0.id == targetID }) else { return }
+        let item = tasks.remove(at: source)
+        tasks.insert(item, at: target)
+    }
+
+    public mutating func emptyTrash() {
+        history.removeAll { $0.kind == .deleted }
     }
 
     @discardableResult
