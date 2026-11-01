@@ -19,6 +19,10 @@ if [ -d "$app_dir" ]; then
     mv "$app_dir" "$PWD/.build/previous-package-$(date +%s).app"
 fi
 ditto '.build/xcode/Build/Products/Release/TookMac.app' "$app_dir"
+if ! cmp -s Resources/AppIcon.icns "$app_dir/Contents/Resources/AppIcon.icns"; then
+    printf '앱 아이콘이 누락되었거나 원본 로고와 다릅니다.\n' >&2
+    exit 1
+fi
 if [ -z "${TOOK_DEVELOPMENT_TEAM:-}" ]; then
     cp Configuration/local.entitlements .build/local.entitlements
     codesign --force --sign - --entitlements .build/local.entitlements "$app_dir/Contents/PlugIns/TookWidgets.appex"

@@ -19,8 +19,8 @@ targets:
     sources:
       - Sources/TookMac
       - Shared
-    resources:
-      - Resources/AppIcon.icns
+      - path: Resources/AppIcon.icns
+        buildPhase: resources
     dependencies:
       - package: TookCore
         product: TookCore

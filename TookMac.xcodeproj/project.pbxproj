@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0C9358CCBD62F3A3D3678193 /* MotionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479160254CE97C1586FAA4B6 /* MotionMonitor.swift */; };
+		2D565375EE55FFD083F8E731 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 27712235FE056CF6C50249C6 /* AppIcon.icns */; };
 		35181AA2C075E21B0D8F2F08 /* CompleteTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */; };
 		4FC23AE7C49794C8E03C2E40 /* TookWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3E3E92812B8382C45549B440 /* TookWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		716E947A3C4BD900C03B783F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 309CFD29211FDCE94063CEAE /* main.swift */; };
@@ -45,6 +46,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		27712235FE056CF6C50249C6 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		309CFD29211FDCE94063CEAE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		3E3E92812B8382C45549B440 /* TookWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TookWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4723210C5E4D20E8FCA7C275 /* TaskStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskStore.swift; sourceTree = "<group>"; };
@@ -90,10 +92,19 @@
 			path = Sources/TookMac;
 			sourceTree = "<group>";
 		};
+		22F5E5833D1D68CB6F38FC19 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				27712235FE056CF6C50249C6 /* AppIcon.icns */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		3CE8FFD5077D0FDD3BE81EA3 = {
 			isa = PBXGroup;
 			children = (
 				5D83C70AB1E7FC6A2CAEBBF9 /* Packages */,
+				22F5E5833D1D68CB6F38FC19 /* Resources */,
 				E513497B43A3E0A1F86F22B6 /* Shared */,
 				1C64169CA93C5EC4CA34A7F7 /* TookMac */,
 				D34ED5FD5930E174DC6C0D07 /* TookWidgets */,
@@ -162,6 +173,7 @@
 			buildConfigurationList = 8A0D374BB3194164CE97AC07 /* Build configuration list for PBXNativeTarget "TookMac" */;
 			buildPhases = (
 				270D817D17256CFBA0F437E5 /* Sources */,
+				81D832CF41F3F168C886B408 /* Resources */,
 				677ED5A6437F1F2A89C50648 /* Frameworks */,
 				A771F70AB56504431C782398 /* Embed Foundation Extensions */,
 			);
@@ -217,6 +229,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		81D832CF41F3F168C886B408 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D565375EE55FFD083F8E731 /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		270D817D17256CFBA0F437E5 /* Sources */ = {
