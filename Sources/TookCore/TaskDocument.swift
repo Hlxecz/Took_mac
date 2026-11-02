@@ -100,8 +100,8 @@ public struct TaskDocument: Codable, Equatable, Sendable {
         tasks.insert(item, at: target)
     }
 
-    public mutating func emptyTrash() {
-        history.removeAll { $0.kind == .deleted }
+    public mutating func clearHistory() {
+        history.removeAll()
     }
 
     @discardableResult

@@ -13,7 +13,7 @@ struct WidgetView: View {
     @State private var repeatRule: RepeatRule = .none
     @State private var showOptions = false
     @State private var editingTask: TaskItem?
-    @State private var confirmEmptyTrash = false
+    @State private var confirmClearHistory = false
     @FocusState private var inputFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -34,13 +34,13 @@ struct WidgetView: View {
         .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(LinearGradient(colors: [.white.opacity(0.36), .white.opacity(0.10)], startPoint: .topLeading, endPoint: .bottomTrailing)))
         .tint(tookBlue)
         .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in store.refresh() }
-        .confirmationDialog("휴지통을 비울까요?", isPresented: $confirmEmptyTrash, titleVisibility: .visible) {
-            Button("휴지통 비우기", role: .destructive) {
-                _ = store.change("휴지통을 비웠어요", allowsUndo: false) { $0.emptyTrash() }
+        .confirmationDialog("모든 기록을 비울까요?", isPresented: $confirmClearHistory, titleVisibility: .visible) {
+            Button("기록 비우기", role: .destructive) {
+                _ = store.change("기록을 비웠어요", allowsUndo: false) { $0.clearHistory() }
             }
             Button("취소", role: .cancel) {}
         } message: {
-            Text("휴지통에 있는 계획을 영구 삭제합니다. 완료 기록은 유지되며, 삭제한 계획은 복원할 수 없어요.")
+            Text("완료 기록과 휴지통에 있는 계획을 모두 영구 삭제합니다. 진행 중인 계획과 예정된 계획은 유지되며, 지운 기록은 복원할 수 없어요.")
         }
         .sheet(item: $editingTask) { task in
             EditTaskView(task: task, store: store)
@@ -56,6 +56,7 @@ struct WidgetView: View {
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: now))!
         let tomorrowPlans = store.document.scheduled(on: tomorrow)
         let trashed = store.document.history.filter { $0.kind == .deleted }.count
+        let historyCount = store.document.history.count
         return VStack(spacing: 0) {
             Spacer().frame(height: 24)
             HStack(alignment: .top) {
@@ -98,12 +99,12 @@ struct WidgetView: View {
                     LazyVStack(spacing: 0) {
                         if tab == .history {
                             HStack {
-                                Text(trashed == 0 ? "휴지통이 비어 있어요" : "휴지통 \(trashed)개")
+                                Text(historyCount == 0 ? "기록이 비어 있어요" : "완료 \(historyCount - trashed)개 · 휴지통 \(trashed)개")
                                     .font(.system(size: 11)).foregroundStyle(.secondary)
                                 Spacer()
-                                Button("휴지통 비우기", role: .destructive) { confirmEmptyTrash = true }
+                                Button("기록 비우기", role: .destructive) { confirmClearHistory = true }
                                     .font(.system(size: 11)).buttonStyle(.plain)
-                                    .disabled(trashed == 0)
+                                    .disabled(historyCount == 0)
                             }.padding(.vertical, 10)
                             if store.document.history.isEmpty {
                                 emptyState(symbol: "clock.arrow.circlepath", title: "아직 기록이 없어요", detail: "완료하거나 지운 계획을 여기서 복원해요.")

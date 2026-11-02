@@ -128,19 +128,20 @@ final class TaskDocumentTests: XCTestCase {
         XCTAssertEqual(doc.upcoming(after: now, calendar: calendar).map(\.title), ["내일 계획", "나중 계획"])
     }
 
-    func testEmptyTrashKeepsCompletedHistoryAndActivePlans() throws {
+    func testClearHistoryRemovesCompletedAndDeletedRecordsAndKeepsPlans() throws {
         var doc = TaskDocument()
         let now = day("2026-10-31")
         let done = try doc.add(title: "끝낸 계획", scheduledDate: now)
         let deleted = try doc.add(title: "지운 계획", scheduledDate: now)
         try doc.add(title: "남길 계획", scheduledDate: now)
+        try doc.add(title: "예정된 계획", scheduledDate: day("2026-11-03"))
         doc.complete(id: done, now: now, calendar: calendar)
         doc.delete(id: deleted, now: now)
-        doc.emptyTrash()
-        XCTAssertEqual(doc.history.count, 1)
-        XCTAssertEqual(doc.history.first?.kind, .completed)
-        XCTAssertEqual(doc.tasks.map(\.title), ["남길 계획"])
-        doc.restore(recordID: doc.history[0].id)
+        let remainingPlans = doc.tasks
+        XCTAssertEqual(Set(doc.history.map(\.kind)), [.completed, .deleted])
+        doc.clearHistory()
+        XCTAssertTrue(doc.history.isEmpty)
+        XCTAssertEqual(doc.tasks, remainingPlans)
         XCTAssertEqual(doc.tasks.count, 2)
     }
 
