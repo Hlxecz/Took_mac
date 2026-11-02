@@ -97,14 +97,14 @@ struct WidgetView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         if tab == .history {
-                            if trashed > 0 {
-                                HStack {
-                                    Text("휴지통 \(trashed)개").font(.system(size: 11)).foregroundStyle(.secondary)
-                                    Spacer()
-                                    Button("휴지통 비우기", role: .destructive) { confirmEmptyTrash = true }
-                                        .font(.system(size: 11)).buttonStyle(.plain)
-                                }.padding(.vertical, 10)
-                            }
+                            HStack {
+                                Text(trashed == 0 ? "휴지통이 비어 있어요" : "휴지통 \(trashed)개")
+                                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                                Spacer()
+                                Button("휴지통 비우기", role: .destructive) { confirmEmptyTrash = true }
+                                    .font(.system(size: 11)).buttonStyle(.plain)
+                                    .disabled(trashed == 0)
+                            }.padding(.vertical, 10)
                             if store.document.history.isEmpty {
                                 emptyState(symbol: "clock.arrow.circlepath", title: "아직 기록이 없어요", detail: "완료하거나 지운 계획을 여기서 복원해요.")
                             }
