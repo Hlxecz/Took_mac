@@ -39,10 +39,10 @@ final class CalendarSync: ObservableObject {
             let message = error?.localizedDescription
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                requesting = false
-                if let message { status = "캘린더에 연결하지 못했어요: \(message)" }
-                else if granted { refresh() }
-                else { authorized = false; status = "시스템 설정 → 개인정보 보호 및 보안 → 캘린더에서 Took Mac을 허용해 주세요." }
+                self.requesting = false
+                if let message { self.status = "캘린더에 연결하지 못했어요: \(message)" }
+                else if granted { self.refresh() }
+                else { self.authorized = false; self.status = "시스템 설정 → 개인정보 보호 및 보안 → 캘린더에서 Took Mac을 허용해 주세요." }
             }
         }
     }
