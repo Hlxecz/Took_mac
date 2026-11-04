@@ -72,6 +72,10 @@ struct TookWidgetView: View {
                     Button(intent: CompleteTaskIntent(taskID: task.id.uuidString)) {
                         HStack(spacing: 8) {
                             Image(systemName: "circle").font(.system(size: 19, weight: .light)).foregroundStyle(.secondary)
+                            if let plan = task.calendarPlan {
+                                Text(plan.isAllDay ? "종일" : plan.start.formatted(date: .omitted, time: .shortened))
+                                    .font(.system(size: 10)).foregroundStyle(.secondary)
+                            }
                             Text(task.title).font(.system(size: family == .systemSmall ? 12 : 14, weight: .medium))
                                 .lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
                         }.contentShape(Rectangle())

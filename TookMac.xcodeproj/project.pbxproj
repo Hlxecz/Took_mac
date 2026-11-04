@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0C9358CCBD62F3A3D3678193 /* MotionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479160254CE97C1586FAA4B6 /* MotionMonitor.swift */; };
+		2C1D6A17F7499845EF766601 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B58B57B34539E584B9F63A8 /* CalendarSync.swift */; };
 		2D565375EE55FFD083F8E731 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 27712235FE056CF6C50249C6 /* AppIcon.icns */; };
 		35181AA2C075E21B0D8F2F08 /* CompleteTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */; };
 		4FC23AE7C49794C8E03C2E40 /* TookWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3E3E92812B8382C45549B440 /* TookWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -51,6 +52,7 @@
 		3E3E92812B8382C45549B440 /* TookWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TookWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4723210C5E4D20E8FCA7C275 /* TaskStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskStore.swift; sourceTree = "<group>"; };
 		479160254CE97C1586FAA4B6 /* MotionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionMonitor.swift; sourceTree = "<group>"; };
+		7B58B57B34539E584B9F63A8 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		8467DA7B6877B21152D60E6A /* Took_mac */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Took_mac; path = .; sourceTree = SOURCE_ROOT; };
 		9AFE79E04F4DDA878541560D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B4D9B1CB4CEA077C021E1C48 /* TookWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TookWidgets.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				9AFE79E04F4DDA878541560D /* AppDelegate.swift */,
+				7B58B57B34539E584B9F63A8 /* CalendarSync.swift */,
 				309CFD29211FDCE94063CEAE /* main.swift */,
 				479160254CE97C1586FAA4B6 /* MotionMonitor.swift */,
 				4723210C5E4D20E8FCA7C275 /* TaskStore.swift */,
@@ -247,6 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				803AE1E17973AD619A3B7C02 /* AppDelegate.swift in Sources */,
+				2C1D6A17F7499845EF766601 /* CalendarSync.swift in Sources */,
 				BDBF58EDE6AAB1BC30F52311 /* CompleteTaskIntent.swift in Sources */,
 				0C9358CCBD62F3A3D3678193 /* MotionMonitor.swift in Sources */,
 				CB2B4A99935F1E58C3295FC2 /* TaskStore.swift in Sources */,

@@ -198,6 +198,10 @@ struct WidgetView: View {
                 .disabled(Calendar.current.startOfDay(for: task.scheduledDate) > Calendar.current.startOfDay(for: now))
             VStack(alignment: .leading, spacing: 5) {
                 Text(task.title).font(.system(size: 14, weight: .medium)).fixedSize(horizontal: false, vertical: true)
+                if let plan = task.calendarPlan {
+                    Label("\(plan.calendarTitle) · \(plan.isAllDay ? "종일" : plan.start.formatted(date: .omitted, time: .shortened))", systemImage: "calendar")
+                        .font(.system(size: 10)).foregroundStyle(.secondary)
+                }
                 if task.repeatRule != .none || tab == .upcoming {
                     HStack(spacing: 5) {
                         if task.repeatRule != .none {
@@ -212,12 +216,13 @@ struct WidgetView: View {
                     .padding(.top, 8).help("계획을 끌어서 순서를 바꿀 수 있어요")
             }
             Menu {
-                Button("수정", systemImage: "pencil") { editingTask = task }
+                Button(task.calendarPlan == nil ? "수정" : "캘린더에서 수정", systemImage: "pencil") { editingTask = task }
+                    .disabled(task.calendarPlan != nil)
                 Button("내일로 미루기", systemImage: "calendar") {
                     _ = store.change("내일 계획으로 옮겼어요") {
                         try $0.edit(id: task.id, title: task.title, scheduledDate: Calendar.current.date(byAdding: .day, value: 1, to: Date())!, repeatRule: task.repeatRule)
                     }
-                }
+                }.disabled(task.calendarPlan != nil)
                 Button("휴지통으로", systemImage: "trash", role: .destructive) {
                     animate { _ = store.change("휴지통으로 옮겼어요") { $0.delete(id: task.id) } }
                 }

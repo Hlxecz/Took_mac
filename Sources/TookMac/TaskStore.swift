@@ -49,6 +49,21 @@ final class TaskStore: ObservableObject {
     }
 
     @discardableResult
+    func syncCalendarPlans(_ plans: [CalendarPlan], now: Date) -> Bool {
+        guard let repository, !loadFailed else { return false }
+        do {
+            let result = try repository.transaction { try $0.syncCalendarPlans(plans, now: now) }
+            if result.before != result.after {
+                document = result.after
+                // 자동 동기화 직전에 있던 되돌리기로 최신 캘린더 내용을 덮어쓰지 않는다.
+                dismissNotice()
+                WidgetCenter.shared.reloadTimelines(ofKind: SharedTaskStorage.widgetKind)
+            }
+            return true
+        } catch { self.error = error.localizedDescription; return false }
+    }
+
+    @discardableResult
     func change(_ message: String, allowsUndo: Bool = true, _ update: (inout TaskDocument) throws -> Void) -> Bool {
         guard let repository, !loadFailed else { return false }
         do {

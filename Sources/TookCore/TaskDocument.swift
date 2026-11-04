@@ -32,6 +32,7 @@ public struct TaskItem: Codable, Identifiable, Equatable, Sendable {
     public var scheduledDate: Date
     public var repeatRule: RepeatRule
     public let createdAt: Date
+    public var calendarPlan: CalendarPlan?
 
     public init(id: UUID = UUID(), title: String, scheduledDate: Date = Date(),
                 repeatRule: RepeatRule = .none, createdAt: Date = Date()) {
@@ -66,8 +67,10 @@ public enum TaskError: LocalizedError {
 
 public struct TaskDocument: Codable, Equatable, Sendable {
     public private(set) var version = 1
-    public private(set) var tasks: [TaskItem] = []
+    public internal(set) var tasks: [TaskItem] = []
     public private(set) var history: [ActivityRecord] = []
+    // 완료·삭제한 일정을 기록 비우기 뒤에도 같은 주에 다시 가져오지 않는다.
+    public internal(set) var suppressedCalendarPlans: [String: Date]?
     public init() {}
 
     public func validate() throws {
@@ -75,6 +78,8 @@ public struct TaskDocument: Codable, Equatable, Sendable {
               Set(tasks.map(\.id)).count == tasks.count,
               Set(history.map(\.id)).count == history.count else { throw TaskError.invalidDocument }
         for item in tasks + history.map(\.task) { _ = try Self.validTitle(item.title) }
+        let calendarKeys = tasks.compactMap { $0.calendarPlan?.key }
+        guard Set(calendarKeys).count == calendarKeys.count else { throw TaskError.invalidDocument }
     }
 
     public func pending(on date: Date, calendar: Calendar = .current) -> [TaskItem] {
@@ -126,6 +131,7 @@ public struct TaskDocument: Codable, Equatable, Sendable {
         let item = tasks[index]
         // 예약 날짜 이전에는 완료되지 않게 해 중복 클릭으로 다음 회차가 사라지는 것을 막는다.
         guard calendar.startOfDay(for: item.scheduledDate) <= calendar.startOfDay(for: now) else { return }
+        suppressCalendarPlan(item)
         history.insert(ActivityRecord(id: UUID(), task: item, date: now, kind: .completed), at: 0)
         if let next = item.repeatRule.nextDate(after: max(item.scheduledDate, now), calendar: calendar) {
             tasks[index].scheduledDate = next
@@ -137,17 +143,29 @@ public struct TaskDocument: Codable, Equatable, Sendable {
     public mutating func delete(id: UUID, now: Date = Date()) {
         guard let index = tasks.firstIndex(where: { $0.id == id }) else { return }
         let item = tasks.remove(at: index)
+        suppressCalendarPlan(item)
         history.insert(ActivityRecord(id: UUID(), task: item, date: now, kind: .deleted), at: 0)
     }
 
     public mutating func restore(recordID: UUID) {
         guard let index = history.firstIndex(where: { $0.id == recordID }) else { return }
         let record = history.remove(at: index)
+        if let key = record.task.calendarPlan?.key {
+            suppressedCalendarPlans?[key] = nil
+            // 날짜가 바뀌어 이미 다시 들어온 일정은 최신 내용 그대로 한 번만 남긴다.
+            if tasks.contains(where: { $0.calendarPlan?.key == key }) { return }
+        }
         if let existing = tasks.firstIndex(where: { $0.id == record.task.id }) {
             tasks[existing].scheduledDate = min(tasks[existing].scheduledDate, record.task.scheduledDate)
         } else {
             tasks.append(record.task)
         }
+    }
+
+    private mutating func suppressCalendarPlan(_ task: TaskItem) {
+        guard let plan = task.calendarPlan else { return }
+        if suppressedCalendarPlans == nil { suppressedCalendarPlans = [:] }
+        suppressedCalendarPlans?[plan.key] = plan.end
     }
 
     private static func validTitle(_ title: String) throws -> String {

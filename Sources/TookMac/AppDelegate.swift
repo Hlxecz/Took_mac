@@ -10,6 +10,7 @@ final class FirstClickHostingView<Content: View>: NSHostingView<Content> {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = TaskStore()
+    private lazy var calendarSync = CalendarSync(store: store)
     let preferences = WidgetPreferences()
     let motion = MotionMonitor()
     private var mainWindow: NSWindow!
@@ -24,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         createMainMenu()
         createMainWindow()
         createStatusMenu()
+        _ = calendarSync
         preferences.windowChanged = { [weak self] in self?.applyPreferences() }
         motion.onDoubleKnock = { [weak self] in self?.togglePlanWindow() }
         applyPreferences()
@@ -110,6 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func showMainWindow() {
         store.refresh()
+        calendarSync.refresh()
         mainWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.orderOut(nil)
@@ -129,22 +132,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func openSettings() {
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 480),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 430, height: 680),
                                   styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "Took Mac 설정"
             window.isReleasedWhenClosed = false
             window.level = .floating
-            window.contentView = FirstClickHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion))
+            window.contentView = FirstClickHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion, calendarSync: calendarSync))
             window.center()
             settingsWindow = window
         }
+        calendarSync.refresh()
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         mainWindow.orderOut(nil)
     }
 
     func applicationDidResignActive(_ notification: Notification) {
-        if !CommandLine.arguments.contains("--show-plans") { hideWindows() }
+        if !CommandLine.arguments.contains("--show-plans") && !calendarSync.requesting { hideWindows() }
     }
     func applicationWillTerminate(_ notification: Notification) { motion.stop() }
     @objc private func quit() { NSApp.terminate(nil) }
@@ -159,9 +163,11 @@ struct SettingsView: View {
     @ObservedObject var preferences: WidgetPreferences
     @ObservedObject var store: TaskStore
     @ObservedObject var motion: MotionMonitor
+    @ObservedObject var calendarSync: CalendarSync
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var error: String?
     var body: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 18) {
             Text("Took Mac").font(.headline)
             Text("필요할 때 열고, 평소에는 백그라운드에서 기다려요.").font(.caption).foregroundStyle(.secondary)
@@ -200,12 +206,44 @@ struct SettingsView: View {
                     }
                 }
             Divider()
+            VStack(alignment: .leading, spacing: 10) {
+                Text("캘린더 · 앞으로 7일").font(.headline)
+                Text("맥 캘린더에 연결된 구글 캘린더를 선택하세요. 오늘 일정은 계획에, 이후 일정은 예정에 표시돼요.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if calendarSync.authorized {
+                    ForEach(calendarSync.calendars) { calendar in
+                        Toggle(isOn: Binding(get: { calendarSync.selectedIDs.contains(calendar.id) },
+                                             set: { calendarSync.select(calendar.id, enabled: $0) })) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(calendar.title)
+                                Text(calendar.account).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    Button("지금 새로고침") { calendarSync.refresh() }
+                    if let date = calendarSync.lastSynced {
+                        Text("최근 확인 \(date.formatted(date: .omitted, time: .shortened)) · 변경 감지 및 5분마다 갱신")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else {
+                    Button(calendarSync.requesting ? "권한 확인 중…" : "캘린더 연결") { calendarSync.connect() }
+                        .disabled(calendarSync.requesting)
+                }
+                Text(calendarSync.status).font(.caption).foregroundStyle(.secondary)
+                if !calendarSync.selectedIDs.isEmpty {
+                    Button("캘린더 선택 해제") { calendarSync.deselectAll() }
+                }
+                Text("Took에서 체크하거나 숨겨도 구글 원본 일정은 바뀌지 않아요. 캘린더 일정은 7일 범위로 갱신됩니다.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Divider()
             Text("바탕화면 우클릭 → 위젯 편집 → Took Mac에서 계획 위젯을 추가할 수 있어요.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            Text("이 맥에 저장되며 원본 Took 및 iCloud와는 연결되지 않아요.")
+            Text("계획은 이 맥에 저장되며 원본 Took 앱과는 연결되지 않아요.")
                 .font(.caption).foregroundStyle(.secondary)
             Button("저장 폴더 열기") { store.openDataFolder() }
-        }.padding(24).frame(width: 350)
+        }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+        }.frame(width: 430, height: 680)
             .alert("설정을 변경하지 못했어요", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
                 Button("확인") { error = nil }
             } message: { Text(error ?? "") }
