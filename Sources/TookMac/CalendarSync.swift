@@ -35,13 +35,15 @@ final class CalendarSync: ObservableObject {
     func connect() {
         guard !requesting else { return }
         requesting = true
-        Task {
-            defer { requesting = false }
-            do {
-                let granted = try await events.requestFullAccessToEvents()
-                if granted { refresh() }
+        events.requestFullAccessToEvents { [weak self] granted, error in
+            let message = error?.localizedDescription
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                requesting = false
+                if let message { status = "캘린더에 연결하지 못했어요: \(message)" }
+                else if granted { refresh() }
                 else { authorized = false; status = "시스템 설정 → 개인정보 보호 및 보안 → 캘린더에서 Took Mac을 허용해 주세요." }
-            } catch { status = "캘린더에 연결하지 못했어요: \(error.localizedDescription)" }
+            }
         }
     }
 
