@@ -75,7 +75,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         mainWindow.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         mainWindow.minSize = NSSize(width: 400, height: 520)
         mainWindow.contentView = FirstClickHostingView(rootView: WidgetView(store: store, preferences: preferences,
-            showSettings: { [weak self] in self?.openSettings() }))
+            showSettings: { [weak self] in self?.openSettings() })
+            .onExitCommand { [weak self] in self?.hideWindows() })
         mainWindow.setFrameAutosaveName("TookMainWindow")
         if !mainWindow.setFrameUsingName("TookMainWindow") { mainWindow.center() }
     }
@@ -137,7 +138,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = "Took Mac 설정"
             window.isReleasedWhenClosed = false
             window.level = .floating
-            window.contentView = FirstClickHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion, calendarSync: calendarSync))
+            window.contentView = FirstClickHostingView(rootView: SettingsView(preferences: preferences, store: store, motion: motion, calendarSync: calendarSync)
+                .onExitCommand { [weak self] in self?.hideWindows() })
             window.center()
             settingsWindow = window
         }
