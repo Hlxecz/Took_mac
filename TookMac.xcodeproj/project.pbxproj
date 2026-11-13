@@ -17,6 +17,7 @@
 		968898F3B27F29F263D1F9D5 /* TookWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9B1CB4CEA077C021E1C48 /* TookWidgets.swift */; };
 		BDBF58EDE6AAB1BC30F52311 /* CompleteTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */; };
 		CB2B4A99935F1E58C3295FC2 /* TaskStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4723210C5E4D20E8FCA7C275 /* TaskStore.swift */; };
+		EE606DEEBA2D34827988B1DF /* CalendarNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3603D727CC4852A6B0FC045 /* CalendarNotifications.swift */; };
 		EF3F990DAD131ACB3D270959 /* TookCore in Frameworks */ = {isa = PBXBuildFile; productRef = EA3298DB4D472EDD7CDD6561 /* TookCore */; };
 		F17147A3BDFD6D8012F8CD60 /* WidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3276657E13095DBD36F06B7 /* WidgetView.swift */; };
 		F8F4A43615713BCF08AA6776 /* TookCore in Frameworks */ = {isa = PBXBuildFile; productRef = 40AD725242C6BA1F5D661C17 /* TookCore */; };
@@ -59,6 +60,7 @@
 		D68251C77F5B3420DC78C385 /* TookMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TookMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D81ED0319A78E3A4AF365040 /* CompleteTaskIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteTaskIntent.swift; sourceTree = "<group>"; };
 		E3276657E13095DBD36F06B7 /* WidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetView.swift; sourceTree = "<group>"; };
+		F3603D727CC4852A6B0FC045 /* CalendarNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarNotifications.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				9AFE79E04F4DDA878541560D /* AppDelegate.swift */,
+				F3603D727CC4852A6B0FC045 /* CalendarNotifications.swift */,
 				7B58B57B34539E584B9F63A8 /* CalendarSync.swift */,
 				309CFD29211FDCE94063CEAE /* main.swift */,
 				479160254CE97C1586FAA4B6 /* MotionMonitor.swift */,
@@ -250,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				803AE1E17973AD619A3B7C02 /* AppDelegate.swift in Sources */,
+				EE606DEEBA2D34827988B1DF /* CalendarNotifications.swift in Sources */,
 				2C1D6A17F7499845EF766601 /* CalendarSync.swift in Sources */,
 				BDBF58EDE6AAB1BC30F52311 /* CompleteTaskIntent.swift in Sources */,
 				0C9358CCBD62F3A3D3678193 /* MotionMonitor.swift in Sources */,

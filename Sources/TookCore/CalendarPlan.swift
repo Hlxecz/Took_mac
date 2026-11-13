@@ -21,6 +21,11 @@ public struct CalendarPlan: Codable, Equatable, Sendable {
         let start = calendar.startOfDay(for: date)
         return DateInterval(start: start, end: calendar.date(byAdding: .day, value: 7, to: start)!)
     }
+
+    public func reminderDate(calendar: Calendar = .current) -> Date {
+        let day = calendar.date(byAdding: .day, value: -2, to: calendar.startOfDay(for: start))!
+        return calendar.date(bySettingHour: 9, minute: 0, second: 0, of: day)!
+    }
 }
 
 extension TaskDocument {

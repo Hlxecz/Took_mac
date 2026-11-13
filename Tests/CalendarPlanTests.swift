@@ -96,4 +96,45 @@ final class CalendarPlanTests: XCTestCase {
         XCTAssertEqual(doc.tasks[0].calendarPlan, moved)
         XCTAssertTrue(doc.history.isEmpty)
     }
+
+    func testCalendarMovesToPlansTwoDaysBeforeAndCanBeCompletedEarly() throws {
+        var doc = TaskDocument()
+        let start = date("2026-11-06T15:00:00")
+        let event = plan(start: start, end: start.addingTimeInterval(3600))
+        try doc.syncCalendarPlans([event], now: now, calendar: calendar)
+        let id = doc.tasks[0].id
+        let threeDaysBefore = date("2026-11-03T23:59:59")
+        XCTAssertTrue(doc.pending(on: threeDaysBefore, calendar: calendar).isEmpty)
+        XCTAssertEqual(doc.upcoming(after: threeDaysBefore, calendar: calendar).map(\.id), [id])
+        let twoDaysBefore = date("2026-11-04T00:00:00")
+        XCTAssertEqual(doc.pending(on: twoDaysBefore, calendar: calendar).map(\.id), [id])
+        XCTAssertTrue(doc.upcoming(after: twoDaysBefore, calendar: calendar).isEmpty)
+        XCTAssertEqual(doc.tasks[0].scheduledDate, start)
+        doc.complete(id: id, now: twoDaysBefore, calendar: calendar)
+        XCTAssertTrue(doc.tasks.isEmpty)
+        try doc.syncCalendarPlans([event], now: now, calendar: calendar)
+        XCTAssertTrue(doc.tasks.isEmpty)
+    }
+
+    func testManualFuturePlansKeepTheirScheduledDay() throws {
+        var doc = TaskDocument()
+        try doc.add(title: "직접 적은 계획", scheduledDate: date("2026-11-06T15:00:00"))
+        let id = doc.tasks[0].id
+        XCTAssertTrue(doc.pending(on: now, calendar: calendar).isEmpty)
+        doc.complete(id: id, now: now, calendar: calendar)
+        XCTAssertEqual(doc.tasks.count, 1)
+        XCTAssertEqual(doc.pending(on: date("2026-11-06T00:00:00"), calendar: calendar).map(\.id), [id])
+    }
+
+    func testReminderUsesNineAMTwoCalendarDaysBeforeAcrossDST() {
+        let event = plan(start: date("2026-11-06T15:00:00"), end: date("2026-11-06T16:00:00"))
+        XCTAssertEqual(event.reminderDate(calendar: calendar), date("2026-11-04T09:00:00"))
+        var dst = Calendar(identifier: .gregorian)
+        dst.timeZone = TimeZone(identifier: "America/New_York")!
+        let start = ISO8601DateFormatter().date(from: "2026-11-02T15:00:00-05:00")!
+        let plan = CalendarPlan(key: "dst", title: "일정", calendarTitle: "달력", start: start,
+                                end: start.addingTimeInterval(3600), isAllDay: false)
+        let expected = ISO8601DateFormatter().date(from: "2026-10-31T09:00:00-04:00")!
+        XCTAssertEqual(plan.reminderDate(calendar: dst), expected)
+    }
 }

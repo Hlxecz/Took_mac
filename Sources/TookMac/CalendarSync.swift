@@ -60,6 +60,12 @@ final class CalendarSync: ObservableObject {
         refresh()
     }
 
+    func refreshFromServer() {
+        guard authorized else { return }
+        events.refreshSourcesIfNecessary()
+        refresh()
+    }
+
     func refresh() {
         authorized = EKEventStore.authorizationStatus(for: .event) == .fullAccess
         guard authorized else {

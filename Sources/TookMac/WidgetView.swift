@@ -6,6 +6,7 @@ private let tookBlue = Color(red: 0.97, green: 0.51, blue: 0.43)
 struct WidgetView: View {
     @ObservedObject var store: TaskStore
     @ObservedObject var preferences: WidgetPreferences
+    @ObservedObject var calendarSync: CalendarSync
     let showSettings: () -> Void
     @State private var tab: TaskTab = .plans
     @State private var title = ""
@@ -33,7 +34,6 @@ struct WidgetView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(LinearGradient(colors: [.white.opacity(0.36), .white.opacity(0.10)], startPoint: .topLeading, endPoint: .bottomTrailing)))
         .tint(tookBlue)
-        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in store.refresh() }
         .confirmationDialog("모든 기록을 비울까요?", isPresented: $confirmClearHistory, titleVisibility: .visible) {
             Button("기록 비우기", role: .destructive) {
                 _ = store.change("기록을 비웠어요", allowsUndo: false) { $0.clearHistory() }
@@ -86,6 +86,15 @@ struct WidgetView: View {
                 }
             }.padding(.horizontal, 20).padding(.bottom, 12)
 
+            if !calendarSync.authorized && !calendarSync.selectedIDs.isEmpty {
+                HStack {
+                    Label("캘린더 접근 권한을 다시 허용해 주세요", systemImage: "calendar.badge.exclamationmark")
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                    Spacer(minLength: 4)
+                    Button("다시 연결") { calendarSync.connect() }.font(.system(size: 11))
+                        .disabled(calendarSync.requesting)
+                }.padding(.horizontal, 24).padding(.bottom, 10)
+            }
             if store.loadFailed {
                 VStack(spacing: 12) {
                     Image(systemName: "externaldrive.badge.exclamationmark").font(.largeTitle).foregroundStyle(.secondary)
@@ -195,19 +204,19 @@ struct WidgetView: View {
             } label: {
                 Image(systemName: "circle").font(.system(size: 22, weight: .light)).foregroundStyle(.secondary.opacity(0.6)).frame(width: 24, height: 25)
             }.buttonStyle(.plain).accessibilityLabel("\(task.title) 완료")
-                .disabled(Calendar.current.startOfDay(for: task.scheduledDate) > Calendar.current.startOfDay(for: now))
+                .disabled(!task.isReady(on: now))
             VStack(alignment: .leading, spacing: 5) {
                 Text(task.title).font(.system(size: 14, weight: .medium)).fixedSize(horizontal: false, vertical: true)
                 if let plan = task.calendarPlan {
                     Label("\(plan.calendarTitle) · \(plan.isAllDay ? "종일" : plan.start.formatted(date: .omitted, time: .shortened))", systemImage: "calendar")
                         .font(.system(size: 10)).foregroundStyle(.secondary)
                 }
-                if task.repeatRule != .none || tab == .upcoming {
+                if task.repeatRule != .none || tab == .upcoming || task.calendarPlan != nil {
                     HStack(spacing: 5) {
                         if task.repeatRule != .none {
                             Image(systemName: "repeat"); Text(task.repeatRule.title)
                         }
-                        if tab == .upcoming { Text(task.scheduledDate, format: .dateTime.month().day().locale(Locale(identifier: "ko_KR"))) }
+                        if tab == .upcoming || task.calendarPlan != nil { Text(task.scheduledDate, format: .dateTime.month().day().locale(Locale(identifier: "ko_KR"))) }
                     }.font(.system(size: 10)).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 3)

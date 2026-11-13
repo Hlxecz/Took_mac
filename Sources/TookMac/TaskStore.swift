@@ -11,6 +11,7 @@ final class TaskStore: ObservableObject {
     @Published var error: String?
     @Published private(set) var loadFailed = false
     let repository: TaskRepository?
+    private var refreshSubscription: AnyCancellable?
 
     init() {
         do { repository = try SharedTaskStorage.repository() }
@@ -20,6 +21,8 @@ final class TaskStore: ObservableObject {
             self.error = error.localizedDescription
         }
         if repository != nil { reload() }
+        refreshSubscription = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in self?.refresh() }
     }
 
     func reload() {
@@ -53,10 +56,12 @@ final class TaskStore: ObservableObject {
         guard let repository, !loadFailed else { return false }
         do {
             let result = try repository.transaction { try $0.syncCalendarPlans(plans, now: now) }
-            if result.before != result.after {
+            if document != result.after {
                 document = result.after
                 // 자동 동기화 직전에 있던 되돌리기로 최신 캘린더 내용을 덮어쓰지 않는다.
                 dismissNotice()
+            }
+            if result.before != result.after {
                 WidgetCenter.shared.reloadTimelines(ofKind: SharedTaskStorage.widgetKind)
             }
             return true

@@ -42,6 +42,11 @@ public struct TaskItem: Codable, Identifiable, Equatable, Sendable {
         self.repeatRule = repeatRule
         self.createdAt = createdAt
     }
+
+    public func isReady(on date: Date, calendar: Calendar = .current) -> Bool {
+        let available = calendarPlan.map { calendar.date(byAdding: .day, value: -2, to: $0.start)! } ?? scheduledDate
+        return calendar.startOfDay(for: available) <= calendar.startOfDay(for: date)
+    }
 }
 
 public struct ActivityRecord: Codable, Identifiable, Equatable, Sendable {
@@ -83,13 +88,11 @@ public struct TaskDocument: Codable, Equatable, Sendable {
     }
 
     public func pending(on date: Date, calendar: Calendar = .current) -> [TaskItem] {
-        let day = calendar.startOfDay(for: date)
-        return tasks.filter { calendar.startOfDay(for: $0.scheduledDate) <= day }
+        tasks.filter { $0.isReady(on: date, calendar: calendar) }
     }
 
     public func upcoming(after date: Date, calendar: Calendar = .current) -> [TaskItem] {
-        let day = calendar.startOfDay(for: date)
-        return tasks.filter { calendar.startOfDay(for: $0.scheduledDate) > day }
+        return tasks.filter { !$0.isReady(on: date, calendar: calendar) }
             .sorted { $0.scheduledDate == $1.scheduledDate ? $0.createdAt < $1.createdAt : $0.scheduledDate < $1.scheduledDate }
     }
 
@@ -129,8 +132,8 @@ public struct TaskDocument: Codable, Equatable, Sendable {
     public mutating func complete(id: UUID, now: Date = Date(), calendar: Calendar = .current) {
         guard let index = tasks.firstIndex(where: { $0.id == id }) else { return }
         let item = tasks[index]
-        // 예약 날짜 이전에는 완료되지 않게 해 중복 클릭으로 다음 회차가 사라지는 것을 막는다.
-        guard calendar.startOfDay(for: item.scheduledDate) <= calendar.startOfDay(for: now) else { return }
+        // 캘린더는 이틀 전부터, 직접 적은 반복 계획은 해당 날짜부터 완료할 수 있다.
+        guard item.isReady(on: now, calendar: calendar) else { return }
         suppressCalendarPlan(item)
         history.insert(ActivityRecord(id: UUID(), task: item, date: now, kind: .completed), at: 0)
         if let next = item.repeatRule.nextDate(after: max(item.scheduledDate, now), calendar: calendar) {
